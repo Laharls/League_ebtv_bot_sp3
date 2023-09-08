@@ -1,0 +1,1 @@
+### EBTV Splatoon 3 Bot
