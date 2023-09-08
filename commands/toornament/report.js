@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { findMatch, setReport } = require("./matchUtils");
+const { findMatch, setReport } = require("./../../utils/matchUtils");
 
 module.exports = {
     data: new SlashCommandBuilder()

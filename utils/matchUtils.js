@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const TEAM_IDS = require("./../data/TEAM_IDS.json")
+const TEAM_IDS = require("./../data/teams_ids.json")
 
 //Don't forget to add the range parameter for the API !
 
