@@ -8,7 +8,7 @@ async function fetchMatches(team1, team2) {
     const url = `https://api.toornament.com/viewer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_LIGUE}`;
     const config = {
         headers: {
-            'X-Api-Key': process.env.TOORNAMENT_TOKEN,
+            'X-Api-Key': process.env.API_KEY,
         }
     }
 
@@ -60,8 +60,8 @@ async function findMatch(interaction, team1, team2, data, callback) {
 async function setPlanif(interaction, match_date, match_id, team1, team2) {
     const url = `https://api.toornament.com/organizer/v2/matches/${match_id}`;
     const headers = {
-        'X-Api-Key': process.env.TOORNAMENT_TOKEN,
-        'Authorization': `Bearer ${process.env.TOORNAMENT_AUTH}`, //Verify what should be the value of Bearer token
+        'X-Api-Key': process.env.API_KEY,
+        'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`, //Verify what should be the value of Bearer token
         'Content-Type': 'application/json',
     };
 
@@ -103,8 +103,8 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
 async function setReport(interaction, teamRep, match_id, team1, team2) {
     const url = `https://api.toornament.com/organizer/v2/matches/${match_id}`;
     const headers = {
-        'X-Api-Key': process.env.TOORNAMENT_TOKEN,
-        'Authorization': `Bearer ${process.env.TOORNAMENT_AUTH}`, //Verify what should be the value of Bearer token
+        'X-Api-Key': process.env.API_KEY,
+        'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`, //Verify what should be the value of Bearer token
         'Content-Type': 'application/json',
     };
 
@@ -144,8 +144,8 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
 async function setResult(interaction, score, match_id, winner, loser, opponent1, opponent2) {
     const url = `https://api.toornament.com/organizer/v2/matches/${match_id}`
     const headers = {
-        'X-Api-Key': process.env.TOORNAMENT_TOKEN,
-        'Authorization': `Bearer ${process.env.TOORNAMENT_AUTH}`, //Verify what should be the value of Bearer token
+        'X-Api-Key': process.env.API_KEY,
+        'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`, //Verify what should be the value of Bearer token
         'Content-Type': 'application/json',
     };
 
