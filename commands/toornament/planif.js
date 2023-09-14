@@ -12,31 +12,29 @@ module.exports = {
     async execute(interaction) {
         const team1 = interaction.options.getRole("équipe1").name
         const team2 = interaction.options.getRole("équipe2").name
-        const utcdiff = 2; //TIMEZONE
+        const cestOffset = "+02:00"; //TIMEZONE
 
-        let datematch = interaction.options.getString("date");
+        // Parse the date string
+        const dateParts = interaction.options.getString("date").split('/');
+        const day = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1; // Months in JavaScript are 0-based (0-11)
+        const year = parseInt(dateParts[2], 10);
 
-        // Regular expression to match common date formats (DD-MM, DD-MM-YY, YYYY-MM-DD)
-        const dateRegex = /^(\d{2}-\d{2}(-\d{2}|\d{4}))$/;
+        console.log(dateParts)
 
-        if (dateRegex.test(datematch)) {
-            datematch = datematch.replace(/\//g, '-'); // Replace slashes with hyphens
-            // If the date format is "DD-MM" or "DD-MM-YY," add the current year
-            if (datematch.length <= 5) {
-                datematch += `-${new Date().getFullYear()}`;
-            }
-            // If the date format is "YYYY-MM-DD," rearrange it to "DD-MM-YYYY"
-            else if (datematch.length === 10 && datematch[2] === '-') {
-                datematch = datematch.split('-').reverse().join('-');
-            }
-        }
-        let hour = interaction.options.getString("heure")
+        // Parse the hour string
+        const hourParts = interaction.options.getString("heure").split(':');
+        const hours = parseInt(hourParts[0], 10);
+        const minutes = parseInt(hourParts[1], 10);
 
+        const combinedDate = new Date(year, month, day, hours, minutes);
+
+        const formattedDate = `${combinedDate.getFullYear()}-${String(combinedDate.getMonth() + 1).padStart(2, '0')}-${String(combinedDate.getDate()).padStart(2, '0')}T${String(combinedDate.getHours()).padStart(2, '0')}:${String(combinedDate.getMinutes()).padStart(2, '0')}:${String(combinedDate.getSeconds()).padStart(2, '0')}${cestOffset}`;
 
         findMatch(interaction,
             team1,
             team2,
-            datematch + "T" + hour + ":00+0" + utcdiff + ":00",
+            formattedDate,
             setPlanif
         );
     },
