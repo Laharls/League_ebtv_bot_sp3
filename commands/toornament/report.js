@@ -16,7 +16,7 @@ module.exports = {
         findMatch(interaction,
             team1,
             team2,
-            teamRep,
+            teamReport,
             setReport);
     },
 };
