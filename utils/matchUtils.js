@@ -1,14 +1,14 @@
 require('dotenv').config();
 const axios = require('axios');
-const TEAM_IDS = require("./../data/teams_ids.json")
-
-//Don't forget to add the range parameter for the API !
+const TEAM_IDS = require("./../data/test_ids.json")
 
 async function fetchMatches(team1, team2) {
-    const url = `https://api.toornament.com/viewer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_LIGUE}`;
+    const url =`https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
+            'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
+            'Range': "matches=0-99",
         }
     }
 
@@ -46,8 +46,9 @@ async function findMatch(interaction, team1, team2, data, callback) {
                 break;
             }
         }
-        if (match_id == 0 && (range == "0-127" || !range)) {
-            getMatch(interaction, team1, team2, data, callback, "128-255");
+        // If no match is found
+        if (match_id == 0) {
+            interaction.reply(`Il n'y a pas de match existant entre ${team1} et ${team2}`)
         } else {
             callback(interaction, data, match_id, team1, team2, opponent1, opponent2);
         }
@@ -71,25 +72,25 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
         switch (response.status) {
             case 200:
                 if (match_date) {
-                    await interaction.editReply(
+                    await interaction.reply(
                         `Le match entre ${team1} et ${team2} a été planifié le ${match_date.substring(0, 10)} à ${match_date.substring(11, 16)}.`
                     )
                 } else {
-                    await interaction.editReply(`Le match entre ${team1} et ${team2} a été annulé.`);
+                    await interaction.reply(`Le match entre ${team1} et ${team2} a été annulé.`);
                 }
                 break;
             case 400:
-                await interaction.editReply('Requête invalide.');
+                await interaction.reply('Requête invalide.');
                 break;
             case 403:
-                await interaction.editReply("L'application n'est pas autorisée à accéder au tournoi.");
+                await interaction.reply("L'application n'est pas autorisée à accéder au tournoi.");
                 break;
             case 404:
-                await interaction.editReply('Match non trouvé.');
+                await interaction.reply('Match non trouvé.');
                 break;
             case 500:
             case 503:
-                await interaction.editReply('Erreur serveur. Veuillez réessayer plus tard.')
+                await interaction.reply('Erreur serveur. Veuillez réessayer plus tard.')
                 break;
             default:
                 console.error(`Unhandled status code: ${response.status}`);
@@ -116,22 +117,22 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
 
         switch (response.status) {
             case 200:
-                await interaction.editReply(
+                await interaction.reply(
                     `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}`
                 );
                 break;
             case 400:
-                await interaction.editReply('Requête invalide.');
+                await interaction.reply('Requête invalide.');
                 break;
             case 403:
-                await interaction.editReply("L'application n'est pas autorisée à accéder au tournoi.")
+                await interaction.reply("L'application n'est pas autorisée à accéder au tournoi.")
                 break;
             case 404:
-                await interaction.editReply("Match non trouvé.")
+                await interaction.reply("Match non trouvé.")
                 break;
             case 500:
             case 503:
-                await interaction.editReply('Erreur serveur. Veuillez réessayer plus tard.')
+                await interaction.reply('Erreur serveur. Veuillez réessayer plus tard.')
                 break;
             default:
                 console.error(`Unhandled status code: ${response.status}`);
@@ -169,27 +170,27 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
         switch (response.status) {
             case 200:
                 score = `**${score[0]}**-${score[2]}`;
-                interaction.editReply(`Résultat du match : **${winner}** ${score} ${loser}`);
+                interaction.reply(`Résultat du match : **${winner}** ${score} ${loser}`);
                 break;
             case 400:
-                interaction.editReply("Requête invalide.");
+                interaction.reply("Requête invalide.");
                 break;
             case 403:
-                interaction.editReply("L'application n'est pas autorisée à accéder au tournoi.");
+                interaction.reply("L'application n'est pas autorisée à accéder au tournoi.");
                 break;
             case 404:
-                interaction.editReply("Match non trouvé.");
+                interaction.reply("Match non trouvé.");
                 break;
             case 500:
             case 503:
-                interaction.editReply("Erreur serveur. Veuillez réessayer plus tard.");
+                interaction.reply("Erreur serveur. Veuillez réessayer plus tard.");
                 break;
             default:
-                interaction.editReply("Veuillez réessayez ultérieurement")
+                interaction.reply("Veuillez réessayez ultérieurement")
         }
     } catch (error) {
         console.error(error)
-        interaction.editReply("Le match n'existe pas ou a déjà été joué.")
+        interaction.reply("Le match n'existe pas ou a déjà été joué.")
     }
 }
 
