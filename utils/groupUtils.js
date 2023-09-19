@@ -1,13 +1,13 @@
 require('dotenv').config();
 const axios = require('axios');
 
-async function fetchGroup() {
+async function fetchGroup(range) {
     const url =`https://api.toornament.com/organizer/v2/groups?tournament_ids=${process.env.TOORNAMENT_ID}`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
             'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
-            'Range': "groups=0-49",
+            'Range': `groups=${range}`,
         }
     }
 
@@ -19,13 +19,13 @@ async function fetchGroup() {
     }
 }
 
-async function getTeamsGroup() {
+async function getTeamsGroup(range) {
     const url =`https://api.toornament.com/organizer/v2/ranking-items?tournament_ids=${process.env.TOORNAMENT_ID}`
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
             'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
-            'Range': `items=0-49`,
+            'Range': `items=${range}`,
         }
     }
 
