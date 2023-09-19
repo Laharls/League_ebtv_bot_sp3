@@ -9,61 +9,52 @@ module.exports = {
         .addStringOption(option => option.setName("range").setDescription("Portée du nombre d'équipe récupérée (ex:0-49)").setRequired(true)),
     async execute(interaction) {
         try {
-            const guild = interaction.guild;
-            const captainRoleName = interaction.options.getRole("capitaine").name
-            const range = interaction.options.getString("range")
+            // Destructure properties from interaction
+            const { guild, options } = interaction;
 
-            //First step : Get all Captains of each teams
+            const captainRoleName = options.getRole("capitaine")?.name;
+            const range = options.getString("range");
 
-            const teams = await fetchParticipant(range);
-            const participantCaptains = teams.map(team => {
-                const captain = team.custom_fields.capitaines !== null && team.custom_fields.capitaines !== undefined
-                    ? team.custom_fields.capitaines
-                    : team.lineup[0].name;
-                return { captain, team: team.name };
-            })
-
-            //Second step : Get groups & teams groups + check if role is existing (create it otherwise)
-            const groups = await fetchGroup();
-            const teamGroups = await getTeamsGroup();
-            const groupIdHashmap = new Map();
-
-            for (const group of groups) {
-                const roleName = group.name
-                if (!guild.roles.cache.some(role => role.name === roleName)) {
-                    const role = await guild.roles.create({ name: roleName });
-                    console.log(`Rôle ${role.name} created`);
-                }
-
-                groupIdHashmap.set(group.id, roleName);
+            // Check if captainRoleName is valid
+            if (!captainRoleName) {
+                console.log("No captain role name found");
+                return;
             }
 
-            //Third step : Compare team group ids with group ids, when equal, add role to captain member
+            // Find the captain role in the guild's role cache
+            const captainRole = guild.roles.cache.find(role => role.name === captainRoleName);
 
-            for (const teamGroup of teamGroups) {
-                const { captain } = participantCaptains.find(obj => obj.team === teamGroup.participant.name);
-                const members = await guild.members.fetch({ query: captain, limit: 1 });
-                const member = members.first();
-
-                if (!member) {
-                    continue;
-                }
-
-                const role = guild.roles.cache.find(r => r.name === groupIdHashmap.get(teamGroup.group_id));
-
-
-                if (!role) {
-                    continue;
-                }
-
-                const hasCaptainRole = member.roles.cache.some(r => r.name === captainRoleName);
-
-                if (!hasCaptainRole) {
-                    continue;
-                }
-
-                await member.roles.add(role);
+            if (!captainRole) {
+                console.log("Captain role not found");
+                return;
             }
+
+            // Fetch groups and team groups
+            const groups = await fetchGroup(range);
+            const teamGroups = await getTeamsGroup(range);
+
+            const groupIdHashmap = new Map(groups.map(group => [group.id, group.name]));
+
+            // Get members with the captain role
+            const membersWithRole = guild.members.cache.filter(member => member.roles.cache.has(captainRole.id));
+
+            // Loop through members with the captain role
+            membersWithRole.forEach(member => {
+                const team = member.nickname?.split('-')[0];
+
+                // Find the corresponding team group
+                const teamGroup = teamGroups.find(teamGroup => teamGroup.participant.name === team);
+
+                if (teamGroup) {
+                    const roleName = groupIdHashmap.get(teamGroup.group_id);
+                    const roleGroup = guild.roles.cache.find(role => role.name === roleName);
+
+                    if (roleGroup) {
+                        member.roles.add(roleGroup);
+                    }
+                }
+            });
+
         } catch (error) {
             console.error(error);
             interaction.reply("Une erreur s'est produite lors de l'exécution de la commande", error);
