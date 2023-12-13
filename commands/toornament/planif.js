@@ -12,7 +12,7 @@ module.exports = {
     async execute(interaction) {
         const team1 = interaction.options.getRole("équipe1").name
         const team2 = interaction.options.getRole("équipe2").name
-        const cestOffset = "+02:00"; //TIMEZONE
+        const cestOffset = "+01:00"; //TIMEZONE (+1:00 heure hiver/ +2:00 heure été)
 
         // Parse the date string
         const dateParts = interaction.options.getString("date").split('/');

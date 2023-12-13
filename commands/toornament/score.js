@@ -9,15 +9,17 @@ module.exports = {
         .addStringOption(option => option.setName("score").setDescription("Score du match (ex: 4-0)").setRequired(true))
         .addRoleOption(option => option.setName("équipe2").setDescription("Equipe2").setRequired(true)),
     async execute(interaction) {
-        const team1 = interaction.options.getRole("équipe1").name
-        const team2 = interaction.options.getRole("équipe2").name
-        const score = interaction.options.getString("score");
+        let team1 = interaction.options.getRole("équipe1").name
+        let team2 = interaction.options.getRole("équipe2").name
+        let score = interaction.options.getString("score");
 
         if (score && /^\d+-\d+$/.test(score)) {
             const [score1, score2] = score.split('-').map(Number);
         
-            if (score1 < score2) {
-                [team1, team2] = [team2, team1];
+            if (score1 < score2) { //Si le score est indiqué dans le "mauvais sens" (ex: Si team1 2-4 team2, le sens sera inversé team2 4-2 team1)
+                const temp = team1;
+                team1 = team2;
+                team2 = temp;
                 score = `${score2}-${score1}`;
             }
         } else {
