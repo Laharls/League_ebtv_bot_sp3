@@ -1,5 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
+
+const { getTournamentToken, updateTokenInEnvFile } = require('./toornamentUtils');
 const TEAM_IDS = require("./../data/test_ids.json")
 
 async function fetchMatches(team1, team2) {
@@ -16,6 +18,11 @@ async function fetchMatches(team1, team2) {
         const response = await axios.get(url, config);
         return response.data;
     } catch (error) {
+        if (error.response && error.response.status === 401) {
+            console.log('Token is not valid. Updating...');
+            const token = getTournamentToken();
+            updateTokenInEnvFile(token);
+        }
         throw new Error(`Error fetching matches: ${error.message}`);
     }
 }
@@ -23,6 +30,7 @@ async function fetchMatches(team1, team2) {
 async function findMatch(interaction, team1, team2, data, callback) {
     try {
         const matches = await fetchMatches(team1, team2);
+        // return;
 
         let match_id = 0;
         let opponent1;
@@ -30,6 +38,15 @@ async function findMatch(interaction, team1, team2, data, callback) {
 
         for (const match of matches) {
             const opp = match.opponents;
+            console.log(opp);
+
+            if (
+                !opp[0]?.participant?.name ||
+                !opp[1]?.participant?.name
+            ) {
+                // Skip the current iteration if either name is null
+                continue;
+            }
 
             if (
                 (opp[0].participant.name.toLowerCase() === team1.toLowerCase() ||
