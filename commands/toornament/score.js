@@ -23,7 +23,7 @@ module.exports = {
                 score = `${score2}-${score1}`;
             }
         } else {
-            await interaction.reply("Invalid score format.");
+            await interaction.reply({ content: "Format du score invalide.", ephemeral: true });
         }
 
         findMatch(interaction,

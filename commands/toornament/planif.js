@@ -20,8 +20,6 @@ module.exports = {
         const month = parseInt(dateParts[1], 10) - 1; // Months in JavaScript are 0-based (0-11)
         const year = parseInt(dateParts[2], 10);
 
-        console.log(dateParts)
-
         // Parse the hour string
         const hourParts = interaction.options.getString("heure").split(':');
         const hours = parseInt(hourParts[0], 10);

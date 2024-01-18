@@ -1,6 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { ChannelType, PermissionsBitField } = require('discord.js');
-const { getNbStage } = require('./../../utils/toornamentUtils');
 const { getTeamsGroup } = require('./../../utils/groupUtils');
 
 module.exports = {
@@ -21,12 +19,6 @@ module.exports = {
                 const role = guild.roles.cache.find((role) => role.name === roleName);
                 return role ? role.id : null;
             };
-
-            // const divisionTeams = teams[`Division ${i}`];
-
-            // // Map the team names to role IDs
-            // const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
-
 
             const categories = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name));
         
