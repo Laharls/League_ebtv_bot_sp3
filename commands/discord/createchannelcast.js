@@ -3,8 +3,8 @@ const { ChannelType, PermissionsBitField } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('createcastchannel')
-        .setDescription('Commande pour ajouter automatiquement les rôles des groupes aux capitaines des équipes !')
+        .setName('creerchannelcast')
+        .setDescription('Commande pour créer un channel de cast !')
         .addRoleOption(option => option.setName("équipe1_cast").setDescription("Nom de la première équipe à être cast").setRequired(true))
         .addRoleOption(option => option.setName("équipe2_cast").setDescription("Nom de la seconde équipe à être cast").setRequired(true)),
     async execute(interaction) {
@@ -21,8 +21,15 @@ module.exports = {
             // Get the guild from the interaction
             const guild = interaction.guild;
 
+            const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && channel.name === "présaison").first();
+
+            if (preSaisonCategory.size === 0) {
+                return await interaction.reply('La catégorie "présaison" n\'a pas été trouvée.');
+            }
+
             await guild.channels.create({
-                name: 'test-cast',
+                name: `${interaction.options.getRole('équipe1_cast')?.name}-${interaction.options.getRole('équipe2_cast')?.name}-cast`,
+                parent: preSaisonCategory.id,
                 type: ChannelType.GuildText,
                 permissionOverwrites: [
                     {
@@ -40,27 +47,7 @@ module.exports = {
                 ],
             });
 
-            await interaction.reply("The channel has been succesfully created")
-
-            // // Create a channel with the desired permissions
-            // const channel = await guild.channels.create('Cast Channel', {
-            //     name: "test-cast",
-            //     type: ChannelType.GuildText, // Change to 'voice' for a voice channel
-            //     permissionOverwrites: [
-            //         {
-            //             id: guild.roles.everyone, // @everyone role
-            //             deny: [PermissionsBitField.Flags.ViewChannel], // Deny access to everyone
-            //         },
-            //         {
-            //             id: team1RoleId, // Role ID for "équipe1 cast"
-            //             allow: [PermissionsBitField.Flags.ViewChannel], // Allow access to "équipe1 cast"
-            //         },
-            //         {
-            //             id: team2RoleId, // Role ID for "équipe2 cast"
-            //             allow: [PermissionsBitField.Flags.ViewChannel], // Allow access to "équipe2 cast"
-            //         },
-            //     ],
-            // });
+            await interaction.reply("Le channel de cast a été correctement créer.")
 
         } catch (error) {
             console.error(error);
