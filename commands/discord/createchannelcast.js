@@ -26,8 +26,8 @@ module.exports = {
 
             const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name)).first();
 
-            if (preSaisonCategory.size === 0) {
-                return await interaction.reply('La catégorie "présaison" n\'a pas été trouvée.');
+            if (!preSaisonCategory || preSaisonCategory.size === 0) {
+                return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
             }
 
             await guild.channels.create({
