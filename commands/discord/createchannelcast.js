@@ -14,14 +14,17 @@ module.exports = {
 
             // Check if the roles were found
             if (!team1RoleId || !team2RoleId) {
-                interaction.reply('Roles not found.');
+                await interaction.reply({content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
                 return;
             }
 
             // Get the guild from the interaction
             const guild = interaction.guild;
 
-            const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && channel.name === "présaison").first();
+            //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
+            const targetPattern = /.*pr[eé]saison.*/i;
+
+            const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name)).first();
 
             if (preSaisonCategory.size === 0) {
                 return await interaction.reply('La catégorie "présaison" n\'a pas été trouvée.');
@@ -47,11 +50,11 @@ module.exports = {
                 ],
             });
 
-            await interaction.reply("Le channel de cast a été correctement créer.")
+            await interaction.reply({content: "Le channel de cast a été correctement créer.", ephemeral: true })
 
         } catch (error) {
             console.error(error);
-            interaction.reply("Une erreur s'est produite lors de l'exécution de la commande", error);
+            interaction.reply({content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
         }
     },
 };

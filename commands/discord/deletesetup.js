@@ -27,13 +27,15 @@ module.exports = {
 
                     category.delete();
                 });
+
+                interaction.reply({content: `Les divisions de la saison ont bien été supprimée.`, ephemeral: true });
             }
             else {
-                return await interaction.reply('Problème avec la commande, la guilde n\'a pas été trouvée');
+                return await interaction.reply({content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: true });
             }
         } catch (error) {
             console.error(error);
-            interaction.reply("Une erreur s'est produite lors de l'exécution de la commande", error);
+            interaction.reply({content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
         }
     },
 };

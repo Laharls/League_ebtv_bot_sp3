@@ -78,7 +78,7 @@ module.exports = {
                     }
                 })
             })
-              interaction.reply({ content: 'Les permissions ont bien été ajoutés.'})
+              interaction.reply({ content: 'Les permissions ont bien été ajoutés.', ephemeral: true})
         } catch (error) {
             console.error(error);
             interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
