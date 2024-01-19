@@ -4,6 +4,7 @@ const fs = require('fs');
 const querystring = require('querystring');
 
 function updateTokenInEnvFile(newToken) {
+    console.log('token toornament', newToken)
     const envConfig = dotenv.parse(fs.readFileSync('.env'));
     envConfig.TOORNAMENT_TOKEN = newToken.access_token;
     fs.writeFileSync('.env', Object.entries(envConfig).map(([key, value]) => `${key}=${value}`).join('\n'));
@@ -23,6 +24,11 @@ async function getNbStage(){
         const response = await axios.get(url, config);
         return response.data.reduce((sum, item) => sum + item.settings.nb_groups, 0);
     }catch(error){
+        if (error.response && error.response.status === 401) {
+            const token = await getTournamentToken();
+            await updateTokenInEnvFile(token);
+            process.exit();
+        }
         console.log(error);
     }
 }
@@ -36,8 +42,6 @@ async function getTournamentToken(){
             'grant_type': 'client_credentials',
     }
 
-    console.log(data)
-
     const formData = querystring.stringify(data);
     const config = {
         headers: {
@@ -46,14 +50,8 @@ async function getTournamentToken(){
     }
 
     try{
-        axios.post(url, formData, config)
-        .then(response => {
-            console.log('Response:', response.data);
-            return response.data;
-        })
-        .catch(error => {
-            console.error('Error:', error.message);
-        });
+        const response = await axios.post(url, formData, config);
+        return response.data;
     }
     catch(error){
         console.log(error)
