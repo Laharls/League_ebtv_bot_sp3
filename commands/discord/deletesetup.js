@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,6 +8,17 @@ module.exports = {
     async execute(interaction) {
         try {
             const guild = interaction.guild;
+	    const user = interaction.user;
+
+	    const member = await guild.members.fetch(user.id);
+	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+
+	    await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+
+	    if(!member.roles.cache.has(process.env.ROLE_ID_ADMIN)){
+                interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+                return;
+            }
 
             if(guild){
                 const targetPattern = /^Division \d+$/;

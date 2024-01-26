@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const { getNbStage } = require('./../../utils/toornamentUtils');
 const { getTeamsGroup } = require('./../../utils/groupUtils');
+const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,6 +12,17 @@ module.exports = {
         try {
             // Get the guild from the interaction
             const guild = interaction.guild;
+	    const user = interaction.user;
+
+	    const member = await guild.members.fetch(user.id);
+	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+
+	    await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+
+	    if(!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)){
+		interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+		return;
+	    }
 
             const nbDivToCreate = await getNbStage();
             const teams = await getTeamsGroup();

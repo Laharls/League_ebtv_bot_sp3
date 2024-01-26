@@ -50,7 +50,16 @@ client.on(Events.InteractionCreate, async interaction => {
 
 // When the client is ready, run this code (only once)
 // We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
+    try{
+        await c.user.setUsername('O.R.C.A');
+
+        const newAvatar = fs.readFileSync('./images/Orca.png');
+        await c.user.setAvatar(newAvatar);
+    } catch (error){
+        console.error('Error updating bot name and avatar:', error);
+    }
+
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
