@@ -48,8 +48,19 @@ module.exports = {
             }
 
             // // Function to get role ID by name
+            // const getRoleIdByName = (roleName) => {
+            //     const role = guild.roles.cache.find((role) => role.name === roleName);
+            //     return role ? role.id : null;
+            // };
+
             const getRoleIdByName = (roleName) => {
-                const role = guild.roles.cache.find((role) => role.name === roleName);
+                // Convert roleName to lowercase and sanitize multiple whitespace characters
+                const roleNameSanitized = roleName.toLowerCase().replace(/\s+/g, ' ');
+                const role = guild.roles.cache.find((role) => {
+                    // Convert role.name to lowercase and sanitize multiple whitespace characters
+                    const roleNameLowerSanitized = role.name.toLowerCase().replace(/\s+/g, ' ');
+                    return roleNameLowerSanitized === roleNameSanitized;
+                });
                 return role ? role.id : null;
             };
 
