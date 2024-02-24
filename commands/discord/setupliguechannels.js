@@ -1,8 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const { getNbStage } = require('./../../utils/toornamentUtils');
-const { getTeamsGroup } = require('./../../utils/groupUtils');
-const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,33 +10,23 @@ module.exports = {
         try {
             // Get the guild from the interaction
             const guild = interaction.guild;
-	    const user = interaction.user;
+            const user = interaction.user;
 
-	    const member = await guild.members.fetch(user.id);
-	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+            const member = await guild.members.fetch(user.id);
+            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-	    await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+            await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
-	    if(!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)){
-		interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
-		return;
-	    }
+            if (!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)) {
+                interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
+                return;
+            }
 
             const nbDivToCreate = await getNbStage();
-            const teams = await getTeamsGroup();
 
-            // Function to get role ID by name
-            const getRoleIdByName = (roleName) => {
-                const role = guild.roles.cache.find((role) => role.name === roleName);
-                return role ? role.id : null;
-            };
+            interaction.reply({ content: "Les divisions sont en cours de création, vérifiez bien que toutes les divisions sont créer. Ne pas oublier d'autoriser la permission pour modifier les permissions des utilisateurs d'un salon (Manage Permissions) dans les catégories des divisions avant d'utiliser la commande /permissiondivisionligue." })
 
-            for(let i = 1; i < nbDivToCreate + 1; i++){
-                const divisionTeams = teams[`Division ${i}`];
-
-                // Map the team names to role IDs
-                const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
-
+            for (let i = 1; i < nbDivToCreate + 1; i++) {
                 const category = await guild.channels.create({
                     name: `Division ${i}`,
                     type: ChannelType.GuildCategory,
@@ -50,7 +38,15 @@ module.exports = {
                         {
                             id: process.env.BOT_ROLE_ID,
                             allow: [PermissionsBitField.Flags.ViewChannel]
-                        }
+                        },
+                        {
+                            id: process.env.ROLE_ID_STAFF_EBTV,
+                            allow: [PermissionsBitField.Flags.ViewChannel]
+                        },
+                        {
+                            id: process.env.ROLE_ID_ASSISTANT_TO,
+                            allow: [PermissionsBitField.Flags.ViewChannel]
+                        },
                     ]
                 });
 
@@ -83,16 +79,6 @@ module.exports = {
                     parent: category.id,
                     type: ChannelType.GuildText,
                 });
-
-                for (const roleId of divisionRoleID) {
-                    const role = await guild.roles.fetch(roleId);
-                    if (role) {
-                        await category.permissionOverwrites.edit(roleId, {
-                            ViewChannel: true,
-                            SendMessages: false
-                        });
-                    }
-                }
             }
         } catch (error) {
             console.error(error);

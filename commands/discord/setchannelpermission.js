@@ -10,22 +10,42 @@ module.exports = {
         try {
             // Get the guild from the interaction
             const guild = interaction.guild;
-	    const user = interaction.user;
+            const user = interaction.user;
+
+            const stageIds = [
+                "7536642295841865728",
+                "7536640081084391424",
+                "7536596345101762560",
+                "7536593471567388672",
+                "7536584899792535552",
+                "7536577779904667648",
+                "7536551181308936192",
+                "7536546455548297216",
+                "7536542055986692096",
+                "7536536195342868480",
+                "7536519095150829568",
+            ]
 
             const member = await guild.members.fetch(user.id);
-	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-	    await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+            await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
-            if(!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)){
-                interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true})
+            if (!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)) {
+                interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true })
                 return;
             }
 
             const targetPattern = /^Division \d+$/;
             await guild.channels.fetch();
 
-            const teams = await getTeamsGroup();
+            const allTeamsByStage = {};
+
+            for (let i = 0; i < stageIds.length; i++) {
+                const stageId = stageIds[i];
+                const teamsByDivision = await getTeamsGroup(stageId);
+                allTeamsByStage[`Division ${i + 1}`] = teamsByDivision;
+            }
 
             // // Function to get role ID by name
             const getRoleIdByName = (roleName) => {
@@ -34,64 +54,106 @@ module.exports = {
             };
 
             const categories = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name));
-        
+
+            const categoriesArray = [...categories.values()];
+
+            const sortedCategories = categoriesArray.sort((a, b) => {
+                const divisionNumberA = parseInt(a.name.match(/\d+/)[0]);
+                const divisionNumberB = parseInt(b.name.match(/\d+/)[0]);
+
+                return divisionNumberA - divisionNumberB;
+            });
+
             if (categories.size === 0) {
-              return await interaction.reply('No categories found in this guild.');
+                return await interaction.reply('Aucune catégorie de division trouvés dans le serveur.');
             }
 
-            let incrementIndex = 0; //To get the role id for later to set channel permissions
+            for (const [incrementIndex, category] of sortedCategories.entries()) {
 
-            categories.forEach(category => {
-                incrementIndex++;
+                const divisionTeams = allTeamsByStage[`Division ${incrementIndex + 1}`];
+                const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
+
+                //Set permission for TO Organiser
+                await category.permissionOverwrites.edit(process.env.ROLE_ID_STAFF_EBTV, {
+                    ViewChannel: true,
+                    SendMessages: true,
+                    CreatePublicThreads: true,
+                    SendMessagesInThreads: true
+                })
+
+                await category.permissionOverwrites.edit(process.env.ROLE_ID_ASSISTANT_TO, {
+                    ViewChannel: true,
+                    SendMessages: true,
+                    CreatePublicThreads: true,
+                    SendMessagesInThreads: true
+                })
+
+                const filteredDivisionRoleId = divisionRoleID.filter(id => id != null)
+                for (const roleId of filteredDivisionRoleId) {
+                    const role = await guild.roles.fetch(roleId);
+                    if (role) {
+                        await category.permissionOverwrites.edit(roleId, {
+                            ViewChannel: true,
+                            SendMessages: false,
+                            SendMessagesInThreads: true,
+                            CreatePublicThreads: false,
+                            CreatePrivateThreads: false
+                        });
+                    }
+                }
+
                 const match = category.name.match(/\d+/); // Match any digit (\d+)
-                const divNumber =  match ? match[0] : null;
-                
-                // Filter channels to get channels within the current category
+                const divNumber = match ? match[0] : null;
+
                 const channelsInCategory = category.children.cache;
 
-                channelsInCategory.forEach(channel => {
-                    console.log(channel.name)
-                    if(channel.name == `div-${divNumber}-planif`){
-                        channel.permissionOverwrites.edit(process.env.ROLE_ID_CAPITAINE, {
+                for (const [channelId, channel] of channelsInCategory) {
+                    const channelName = channel.name;
+
+                    if (channel.name == `div-${divNumber}-planif`) {
+                        await channel.permissionOverwrites.edit(process.env.ROLE_ID_CAPITAINE, {
                             SendMessages: true,
                         })
                     }
 
-                    if(channel.name == `div-${divNumber}-support`){
-                        const divisionTeams = teams[`Division ${incrementIndex}`];
+                    if (channel.name == `div-${divNumber}-support`) {
+                        const divisionTeams = allTeamsByStage[`Division ${incrementIndex + 1}`];
                         const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
-                        for(const roleId of divisionRoleID){
-                            const role = guild.roles.fetch(roleId);
+
+                        const filteredDivisionRoleId = divisionRoleID.filter(id => id != null)
+                        for (const roleId of filteredDivisionRoleId) {
+                            const role = await guild.roles.fetch(roleId);
                             if (role) {
-                                channel.permissionOverwrites.edit(roleId, {
+                                await channel.permissionOverwrites.edit(roleId, {
                                     SendMessages: true
                                 });
                             }
                         }
                     }
 
-                    if(channel.name == `div-${divNumber}-récaps-manches`){
-                        channel.permissionOverwrites.edit(process.env.ROLE_ID_CAPITAINE, {
+                    if (channel.name == `div-${divNumber}-récaps-manches`) {
+                        await channel.permissionOverwrites.edit(process.env.ROLE_ID_CAPITAINE, {
                             SendMessages: true,
                             AttachFiles: true
                         })
                     }
 
-                    if(channel.name == `div-${divNumber}-discussion`){
-                        const divisionTeams = teams[`Division ${incrementIndex}`];
+                    if (channel.name == `div-${divNumber}-discussion`) {
+                        const divisionTeams = allTeamsByStage[`Division ${incrementIndex + 1}`];
                         const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
-                        for(const roleId of divisionRoleID){
-                            const role = guild.roles.fetch(roleId);
+
+                        const filteredDivisionRoleId = divisionRoleID.filter(id => id != null)
+                        for (const roleId of filteredDivisionRoleId) {
+                            const role = await guild.roles.fetch(roleId);
                             if (role) {
-                                channel.permissionOverwrites.edit(roleId, {
+                                await channel.permissionOverwrites.edit(roleId, {
                                     SendMessages: true
                                 });
                             }
                         }
                     }
-                })
-            })
-              interaction.reply({ content: 'Les permissions ont bien été ajoutés.', ephemeral: true})
+                }
+            }
         } catch (error) {
             console.error(error);
             interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });

@@ -26,54 +26,28 @@ async function fetchGroup(range="0-49") {
     }
 }
 
-async function getTeamsGroup(range="0-49") {
-    const url =`https://api.toornament.com/organizer/v2/ranking-items?tournament_ids=${process.env.TOORNAMENT_ID}`
+async function getTeamsGroup(stage_id) {
+    const url =`https://api.toornament.com/organizer/v2/ranking-items?tournament_ids=${process.env.TOORNAMENT_ID}&stage_ids=${stage_id}`
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
             'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
-            'Range': `items=${range}`,
+            'Range': `items=0-49`,
         }
     }
 
     try {
         const response = await axios.get(url, config);
-        const groupName = await fetchGroup();
+        const teamsData = response.data;
 
-        // Filter out entries where participant is null
-        const validEntries = response.data.filter(entry => entry.participant !== null);
+        const teams = [];
 
-        // Group entries by group_id
-        const groupedByGroup = validEntries.reduce((grouped, entry) => {
-        const groupId = entry.group_id;
-        if (!grouped[groupId]) {
-            grouped[groupId] = [];
-        }
-        grouped[groupId].push(entry);
-        return grouped;
-        }, {});
-
-        const groupSettings = groupName.reduce((settingsMap, group) => {
-            settingsMap[group.id] = group.name;
-            return settingsMap;
-          }, {});
-
-        // Extract team names for each group
-        const teamNamesByGroup = Object.keys(groupedByGroup).reduce((result, groupId) => {
-            const teamNames = groupedByGroup[groupId].map(entry => entry.participant.name);
-            const groupName = groupSettings[groupId];
-            result[groupName] = teamNames;
-            return result;
-          }, {});
-
-          const sortedTeamNamesByGroup = Object.keys(teamNamesByGroup)
-            .sort()
-            .reduce((result, key) => {
-                result[key] = teamNamesByGroup[key];
-                return result;
-            }, {});
-        
-            return sortedTeamNamesByGroup;
+        // Group teams by group_id
+        teamsData.forEach(team => {
+            teams.push(team.participant?.name); // Assuming 'name' is the team name
+        });
+    
+        return teams; 
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
