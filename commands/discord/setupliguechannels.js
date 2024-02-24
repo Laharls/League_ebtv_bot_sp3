@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const { getNbStage } = require('./../../utils/toornamentUtils');
+const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
     data: new SlashCommandBuilder()
