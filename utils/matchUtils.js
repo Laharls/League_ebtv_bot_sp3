@@ -2,7 +2,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 const { getTournamentToken, updateTokenInEnvFile } = require('./toornamentUtils');
-const TEAM_IDS = require("./../data/test_ids.json")
+const TEAM_IDS = require("./../data/teams_ids.json")
 
 async function fetchMatches(team1, team2) {
     const url =`https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
