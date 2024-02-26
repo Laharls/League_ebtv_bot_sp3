@@ -26,6 +26,28 @@ async function fetchGroup(range="0-49") {
     }
 }
 
+async function fetchUniqueGroup(group) {
+    const url =`https://api.toornament.com/organizer/v2/groups/${group}`;
+    const config = {
+        headers: {
+            'X-Api-Key': process.env.API_KEY,
+            'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
+        }
+    }
+
+    try {
+        const response = await axios.get(url, config);
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            const token = await getTournamentToken();
+            await updateTokenInEnvFile(token);
+            process.exit();
+        }
+        throw new Error(`Une erreur est survenue : ${error.message}`);
+    }
+}
+
 async function getTeamsGroup(stage_id) {
     const url =`https://api.toornament.com/organizer/v2/ranking-items?tournament_ids=${process.env.TOORNAMENT_ID}&stage_ids=${stage_id}`
     const config = {
@@ -61,4 +83,5 @@ async function getTeamsGroup(stage_id) {
 module.exports = {
     fetchGroup,
     getTeamsGroup,
+    fetchUniqueGroup
 }

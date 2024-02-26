@@ -27,6 +27,29 @@ async function fetchMatches(team1, team2) {
     }
 }
 
+async function fetchUniqueMatch(team1, team2) {
+    const url =`https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
+    const config = {
+        headers: {
+            'X-Api-Key': process.env.API_KEY,
+            'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
+            'Range': "matches=0-1",
+        }
+    }
+
+    try {
+        const response = await axios.get(url, config);
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            const token = await getTournamentToken();
+            await updateTokenInEnvFile(token);
+            process.exit();
+        }
+        throw new Error(`Une erreur est survenue : ${error.message}`);
+    }
+}
+
 async function findMatch(interaction, team1, team2, data, callback) {
     try {
         const matches = await fetchMatches(team1, team2);
@@ -232,5 +255,6 @@ module.exports = {
     findMatch,
     setPlanif,
     setReport,
-    setResult
+    setResult,
+    fetchUniqueMatch
 }
