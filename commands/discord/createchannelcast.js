@@ -19,6 +19,8 @@ module.exports = {
             const guild = interaction.guild;
             const user = interaction.user;
 
+            await interaction.deferReply();
+
             const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
             const member = await guild.members.fetch(user.id);
@@ -42,7 +44,7 @@ module.exports = {
 
             // Check if the roles were found
             if (!team1RoleId || !team2RoleId) {
-                await interaction.reply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
+                await interaction.editReply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
                 return;
             }
 
@@ -66,7 +68,7 @@ module.exports = {
             // const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name)).first(); check for presaison
 
             if (!preSaisonCategory || preSaisonCategory.size === 0) {
-                return await interaction.reply('La catégorie où doit être placé le salon n\'a pas été trouvée.');
+                return await interaction.editReply('La catégorie où doit être placé le salon n\'a pas été trouvée.');
                 // return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
             }
 
@@ -75,7 +77,7 @@ module.exports = {
 
 
             if (isExistingChannel || isExistingChannelReverse) {
-                return await interaction.reply("Le match a déjà été planifié par un autre caster.");
+                return await interaction.editReply("Le match a déjà été planifié par un autre caster.");
             }
 
             const castChannel = await guild.channels.create({
@@ -122,11 +124,11 @@ module.exports = {
                 await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match.`)
             }
 
-            await interaction.reply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
+            await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
 
         } catch (error) {
             console.error(error);
-            interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
+            await interaction.editReply({ content: `Une erreur s'est produite lors de l'exécution de la commande, veuillez réessayer ultérieurement.`});
         }
     },
 };
