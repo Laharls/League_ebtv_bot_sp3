@@ -85,19 +85,19 @@ module.exports = {
                 const divisionRoleID = divisionTeams.map((teamName) => getRoleIdByName(teamName));
 
                 //Set permission for TO Organiser
-                await category.permissionOverwrites.edit(process.env.ROLE_ID_STAFF_EBTV, {
-                    ViewChannel: true,
-                    SendMessages: true,
-                    CreatePublicThreads: true,
-                    SendMessagesInThreads: true
-                })
+                //await category.permissionOverwrites.edit(process.env.ROLE_ID_STAFF_EBTV, {
+                    //ViewChannel: true,
+                    //SendMessages: true,
+                    //CreatePublicThreads: true,
+                    //SendMessagesInThreads: true
+                //})
 
-                await category.permissionOverwrites.edit(process.env.ROLE_ID_ASSISTANT_TO, {
-                    ViewChannel: true,
-                    SendMessages: true,
-                    CreatePublicThreads: true,
-                    SendMessagesInThreads: true
-                })
+                //await category.permissionOverwrites.edit(process.env.ROLE_ID_ASSISTANT_TO, {
+                    //ViewChannel: true,
+                    //SendMessages: true,
+                    //CreatePublicThreads: true,
+                    //SendMessagesInThreads: true
+                //})
 
                 const filteredDivisionRoleId = divisionRoleID.filter(id => id != null)
                 for (const roleId of filteredDivisionRoleId) {
