@@ -29,7 +29,7 @@ module.exports = {
             const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 
             if(!hasAllowedRole){
-            interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+            interaction.editReply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
             return;
             }
 
