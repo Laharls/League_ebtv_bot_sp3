@@ -116,19 +116,26 @@ module.exports = {
                 ],
             });
 
+            const castPreparation = `
+ Pour bien préparer le cast, merci d’indiquer :\n
+ \u2022 Les filles et garçons de vos équipes
+ \u2022 S’il va y avoir des changements entre les manches
+ \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
+ Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !`;
+
             if (co_caster && memberCoCaster) {
                 castChannel.permissionOverwrites.edit(memberCoCaster, { ViewChannel: true, SendMessages: true });
-                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> et <@${memberCoCaster.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match.`)
+                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> et <@${memberCoCaster.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`)
             }
             else {
-                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match.`)
+                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`)
             }
 
             await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
 
         } catch (error) {
             console.error(error);
-            await interaction.editReply({ content: `Une erreur s'est produite lors de l'exécution de la commande, veuillez réessayer ultérieurement.`});
+            await interaction.editReply({ content: `Une erreur s'est produite lors de l'exécution de la commande, veuillez réessayer ultérieurement.` });
         }
     },
 };
