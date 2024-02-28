@@ -2,6 +2,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 const { getTournamentToken, updateTokenInEnvFile } = require('./toornamentUtils');
+const { getDayOfWeekWithDate } = require('./utilityTools');
 const TEAM_IDS = require("./../data/teams_ids.json")
 
 async function fetchMatches(team1, team2) {
@@ -117,8 +118,8 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
         switch (response.status) {
             case 200:
                 if (match_date) {
-
-                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${match_date.substring(0, 10)} à ${match_date.substring(11, 16)}.`} )
+                    
+                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.`} )
                 } else {
                     await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été annulé.`, ephemeral: true });
                 }
