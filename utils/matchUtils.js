@@ -6,7 +6,7 @@ const { getDayOfWeekWithDate } = require('./utilityTools');
 const TEAM_IDS = require("./../data/teams_ids.json")
 
 async function fetchMatches(team1, team2) {
-    const url =`https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
+    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
@@ -24,12 +24,12 @@ async function fetchMatches(team1, team2) {
             await updateTokenInEnvFile(token);
             process.exit();
         }
-        throw new Error(`Error fetching matches: ${error.message}`);
+        throw new Error(`Error fetching matches : ${error.message}`);
     }
 }
 
 async function fetchUniqueMatch(team1, team2) {
-    const url =`https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
+    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
@@ -62,7 +62,6 @@ async function findMatch(interaction, team1, team2, data, callback) {
 
         for (const match of matches) {
             const opp = match.opponents;
-            console.log(opp);
 
             if (
                 !opp[0]?.participant?.name ||
@@ -89,7 +88,7 @@ async function findMatch(interaction, team1, team2, data, callback) {
         }
         // If no match is found
         if (match_id == 0) {
-            interaction.reply({ content: `Il n'y a pas de match entre ${team1} et ${team2}, vérifier les teams.`})
+            interaction.editReply({ content: `Il n'y a pas de match entre ${team1} et ${team2}, vérifier les teams.` })
         } else {
             callback(interaction, data, match_id, team1, team2, opponent1, opponent2);
         }
@@ -118,24 +117,24 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
         switch (response.status) {
             case 200:
                 if (match_date) {
-                    
-                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.`} )
+
+                    await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.` })
                 } else {
-                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été annulé.`});
+                    await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été annulé.` });
                 }
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide. Vérifier les paramètres de la commande.'});
+                await interaction.editReply({ content: 'Requête invalide. Vérifier les paramètres de la commande.' });
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
+                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.'});
+                await interaction.editReply({ content: 'Match non trouvé.' });
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
+                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
                 break;
             default:
                 console.error(`Erreur code status non apprivoisé : ${response.status}`);
@@ -167,20 +166,20 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
 
         switch (response.status) {
             case 200:
-                await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}`});
+                await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}` });
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide.'});
+                await interaction.editReply({ content: 'Requête invalide.' });
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
+                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.'});
+                await interaction.editReply({ content: 'Match non trouvé.' });
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
+                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
                 break;
             default:
                 console.error(`Erreur code status non apprivoisé : ${response.status}`);
@@ -223,20 +222,20 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
         switch (response.status) {
             case 200:
                 score = `**${score[0]}**-${score[2]}`;
-                await interaction.reply({ content: `Résultat du match : **${winner}** ${score} ${loser}`});
+                await interaction.editReply({ content: `Résultat du match : **${winner}** ${score} ${loser}` });
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide.'});
+                await interaction.editReply({ content: 'Requête invalide.' });
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
+                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.'});
+                await interaction.editReply({ content: 'Match non trouvé.' });
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
+                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
                 break;
             default:
                 console.error(`Erreur code status non apprivoisé : ${response.status}`);
@@ -248,7 +247,7 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
             process.exit();
         }
         console.error(error)
-        interaction.reply({ content: "Le match n'existe pas.", ephemeral: true })
+        interaction.editReply({ content: "Le match n'existe pas.", ephemeral: true })
     }
 }
 

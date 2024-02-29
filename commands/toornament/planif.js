@@ -11,26 +11,42 @@ module.exports = {
         .addStringOption(option => option.setName("date").setDescription("Date (JJ/MM/AAAA)").setRequired(true))
         .addStringOption(option => option.setName("heure").setDescription("Heure (HH:mm)").setRequired(true)),
     async execute(interaction) {
-	const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO];
+        const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO];
 
         const guild = interaction.guild;
         const user = interaction.user;
 
-        const member = await guild.members.fetch(user.id);
-	const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+        await interaction.deferReply();
 
-	await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+        const member = await guild.members.fetch(user.id);
+        const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+
+        await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
         const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 
-        if(!hasAllowedRole){
-            interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+        if (!hasAllowedRole) {
+            interaction.editReply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
             return;
         }
 
         const team1 = interaction.options.getRole("équipe1").name
         const team2 = interaction.options.getRole("équipe2").name
         const cestOffset = "+01:00"; //TIMEZONE (+1:00 heure hiver/ +2:00 heure été)
+        const dateInput = interaction.options.getString("date");
+        const hourInput = interaction.options.getString("heure");
+
+        const dateRegex = new RegExp(/^\d{2}\/\d{2}\/\d{4}$/) //Check date is format JJ/MM/YYYY
+        if (!dateRegex.test(dateInput)) {
+            await interaction.editReply("Le format de la date est invalide, veuillez réessayer en entrant une date valide.")
+            return;
+        }
+
+        const hourRegex = new RegExp(/^\d{2}:\d{2}$/) //Check hour is format HH:MM
+        if (!hourRegex.test(hourInput)) {
+            await interaction.editReply("Le format de l'heure est invalide, veuillez réessayer en entrant une heure valide.")
+            return;
+        }
 
         // Parse the date string
         const dateParts = interaction.options.getString("date").split('/');

@@ -10,20 +10,22 @@ module.exports = {
         .addStringOption(option => option.setName("score").setDescription("Score du match (ex: 4-0)").setRequired(true))
         .addRoleOption(option => option.setName("équipe2").setDescription("Equipe2").setRequired(true)),
     async execute(interaction) {
-	const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO];
+        const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO];
 
         const guild = interaction.guild;
         const user = interaction.user;
 
-        const member = await guild.members.fetch(user.id);
-	const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+        await interaction.deferReply();
 
-	await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+        const member = await guild.members.fetch(user.id);
+        const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+
+        await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
         const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 
-        if(!hasAllowedRole){
-            interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+        if (!hasAllowedRole) {
+            interaction.editReply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
             return;
         }
 
@@ -33,7 +35,7 @@ module.exports = {
 
         if (score && /^\d+-\d+$/.test(score)) {
             const [score1, score2] = score.split('-').map(Number);
-        
+
             if (score1 < score2) { //Si le score est indiqué dans le "mauvais sens" (ex: Si team1 2-4 team2, le sens sera inversé team2 4-2 team1)
                 const temp = team1;
                 team1 = team2;
@@ -41,7 +43,7 @@ module.exports = {
                 score = `${score2}-${score1}`;
             }
         } else {
-            await interaction.reply({ content: "Format du score invalide.", ephemeral: true });
+            await interaction.editReply({ content: "Format du score invalide.", ephemeral: true });
         }
 
         findMatch(interaction,
