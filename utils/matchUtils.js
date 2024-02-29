@@ -121,24 +121,24 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
                     
                     await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.`} )
                 } else {
-                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été annulé.`, ephemeral: true });
+                    await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été annulé.`});
                 }
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide.', ephemeral: true });
+                await interaction.reply({ content: 'Requête invalide. Vérifier les paramètres de la commande.'});
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi.", ephemeral: true });
+                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.', ephemeral: true });
+                await interaction.reply({ content: 'Match non trouvé.'});
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.', ephemeral: true })
+                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
                 break;
             default:
-                console.error(`Unhandled status code: ${response.status}`);
+                console.error(`Erreur code status non apprivoisé : ${response.status}`);
         }
     } catch (error) {
         if (error.response && error.response.status === 401) {
@@ -170,20 +170,20 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
                 await interaction.reply({ content: `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}`});
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide.', ephemeral: true });
+                await interaction.reply({ content: 'Requête invalide.'});
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi.", ephemeral: true });
+                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.', ephemeral: true });
+                await interaction.reply({ content: 'Match non trouvé.'});
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.', ephemeral: true })
+                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
                 break;
             default:
-                console.error(`Unhandled status code: ${response.status}`);
+                console.error(`Erreur code status non apprivoisé : ${response.status}`);
         }
     } catch (error) {
         if (error.response && error.response.status === 401) {
@@ -226,20 +226,20 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
                 await interaction.reply({ content: `Résultat du match : **${winner}** ${score} ${loser}`});
                 break;
             case 400:
-                await interaction.reply({ content: 'Requête invalide.', ephemeral: true });
+                await interaction.reply({ content: 'Requête invalide.'});
                 break;
             case 403:
-                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi.", ephemeral: true });
+                await interaction.reply({ content: "L'application n'est pas autorisée à accéder au tournoi."});
                 break;
             case 404:
-                await interaction.reply({ content: 'Match non trouvé.', ephemeral: true });
+                await interaction.reply({ content: 'Match non trouvé.'});
                 break;
             case 500:
             case 503:
-                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.', ephemeral: true })
+                await interaction.reply({ content: 'Erreur serveur. Veuillez réessayer plus tard.'})
                 break;
             default:
-                console.error(`Unhandled status code: ${response.status}`);
+                console.error(`Erreur code status non apprivoisé : ${response.status}`);
         }
     } catch (error) {
         if (error.response && error.response.status === 401) {
