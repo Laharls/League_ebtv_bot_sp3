@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const { embedBuilder } = require("./../../utils/embedBuilder");
-const { formatingString } = require("./../../utils/utilityTools");
+const { formatingString, checkDivPickBan } = require("./../../utils/utilityTools");
 const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
 
@@ -28,19 +28,22 @@ module.exports = {
 
             const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 
-            if(!hasAllowedRole){
-            interaction.editReply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
-            return;
+            if (!hasAllowedRole) {
+                interaction.editReply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
+                return;
             }
 
             const co_caster = interaction.options.getUser("co_caster");
-            const memberCoCaster = (co_caster !== null && co_caster !== undefined) ? await guild.members.fetch(co_caster.id) : false;
+            const memberCoCaster = co_caster ? await guild.members.fetch(co_caster.id) : null;
 
-            const team1RoleId = await interaction.options.getRole('équipe1_cast')?.id;
-            const team2RoleId = await interaction.options.getRole('équipe2_cast')?.id;
+            const team1Role = interaction.options.getRole('équipe1_cast');
+            const team2Role = interaction.options.getRole('équipe2_cast');
 
-            const team1Name = await interaction.options.getRole('équipe1_cast')?.name
-            const team2Name = await interaction.options.getRole('équipe2_cast')?.name
+            const team1RoleId = team1Role?.id;
+            const team2RoleId = team2Role?.id;
+
+            const team1Name = team1Role?.name;
+            const team2Name = team2Role?.name;
 
             // Check if the roles were found
             if (!team1RoleId || !team2RoleId) {
@@ -53,7 +56,7 @@ module.exports = {
 
             const group_id = await fetchUniqueMatch(team1Name, team2Name);
 
-            const divisionName = await fetchUniqueGroup(group_id[0].group_id);
+            const divisionName = await fetchUniqueGroup(group_id[0]?.group_id);
 
 
             //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
@@ -71,6 +74,8 @@ module.exports = {
                 return await interaction.editReply('La catégorie où doit être placé le salon n\'a pas été trouvée.');
                 // return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
             }
+
+            const pinPickAndBan = checkDivPickBan(preSaisonCategory.name);
 
             const isExistingChannel = preSaisonCategory.children.cache.find(channel => channel.name === channelBaseNameFormated.toLowerCase());
             const isExistingChannelReverse = preSaisonCategory.children.cache.find(channel => channel.name === channelBaseNameFormatedReverse.toLowerCase());
@@ -123,15 +128,19 @@ module.exports = {
  \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
  Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !`;
 
-            if (co_caster && memberCoCaster) {
-                castChannel.permissionOverwrites.edit(memberCoCaster, { ViewChannel: true, SendMessages: true });
-                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> et <@${memberCoCaster.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`)
-            }
-            else {
-                await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n Votre match est prévu pour être casté par <@${member.user.id}> \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`)
+
+
+            const casterAnnouncement = co_caster && memberCoCaster ? ` et <@${memberCoCaster.user.id}>` : '';
+            const casterAnnouncementText = `Votre match est prévu pour être casté par <@${member.user.id}>${casterAnnouncement}`;
+
+            await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n ${casterAnnouncementText} \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`);
+
+            if (pinPickAndBan) {
+                const msg = await castChannel.send({ files: ['images/s15_pick_ban.png'] });
+                await msg.pin();
             }
 
-            await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
+            await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
 
         } catch (error) {
             console.error(error);

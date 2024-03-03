@@ -11,6 +11,17 @@ function formatingString(string){
     return stringWithoutSpecialChars.replace(/-+/g, '-');
 }
 
+function checkDivPickBan(divisionName){
+    const parts = divisionName.split(" ")
+    const divNumber = parseInt(parts[1]);
+
+    if(!isNaN(divNumber) && divNumber <= 6){
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function getDayOfWeekWithDate(dateString) {
     let weekdays = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
@@ -40,4 +51,5 @@ function getDayOfWeekWithDate(dateString) {
 module.exports = {
     formatingString,
     getDayOfWeekWithDate,
+    checkDivPickBan
 }
