@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const { embedBuilder } = require("./../../utils/embedBuilder");
-const { formatingString, checkDivPickBan } = require("./../../utils/utilityTools");
+const { formatingString, checkDivPickBan, checkCastTime } = require("./../../utils/utilityTools");
 const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
 
@@ -54,10 +54,9 @@ module.exports = {
             const channelBaseNameFormated = formatingString(`${team1Name}-${team2Name}-cast`);
             const channelBaseNameFormatedReverse = formatingString(`${team2Name}-${team1Name}-cast`);
 
-            const group_id = await fetchUniqueMatch(team1Name, team2Name);
+            const matchData = await fetchUniqueMatch(team1Name, team2Name);
 
-            const divisionName = await fetchUniqueGroup(group_id[0]?.group_id);
-
+            const divisionName = await fetchUniqueGroup(matchData[0]?.group_id);
 
             //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
             // const targetPattern = /.*pr[eé]saison.*/i; check for presaison
@@ -123,15 +122,15 @@ module.exports = {
 
             const castPreparation = `
  Pour bien préparer le cast, merci d’indiquer :\n
- \u2022 Les filles et garçons de vos équipes
+ \u2022 Les pronoms et genres des membres de vos équipes
  \u2022 S’il va y avoir des changements entre les manches
  \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
  Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !`;
 
-
+            const announcementText = checkCastTime(matchData[0].scheduled_datetime);
 
             const casterAnnouncement = co_caster && memberCoCaster ? ` et <@${memberCoCaster.user.id}>` : '';
-            const casterAnnouncementText = `Votre match est prévu pour être casté par <@${member.user.id}>${casterAnnouncement}`;
+            const casterAnnouncementText = `${announcementText} <@${member.user.id}>${casterAnnouncement}`
 
             await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n ${casterAnnouncementText} \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`);
 

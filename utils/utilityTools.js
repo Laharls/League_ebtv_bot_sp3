@@ -22,6 +22,23 @@ function checkDivPickBan(divisionName){
     }
 }
 
+function checkCastTime(dateString){
+    const providedDate = new Date(dateString);
+    const today = new Date();
+
+    if(providedDate.toDateString() === today.toDateString()) {
+        let hour = providedDate.toLocaleTimeString('fr', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }); //Include the timezone time on the previous date given
+        hour = hour.replace(":", "h")
+        return `Votre match prévu aujourd'hui à ${hour} va être cast par`;
+    } else {
+        const parisDateTimezone = providedDate.toLocaleTimeString('fr', { timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit', hour: '2-digit',minute: '2-digit' });
+        const date = parisDateTimezone.split(' ')[0];
+        let hour = parisDateTimezone.split(' ')[1];
+        hour = hour.replace(":", "h")
+        return `Votre match prévu le ${date} à ${hour} va être cast par`;
+    }
+}
+
 function getDayOfWeekWithDate(dateString) {
     let weekdays = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
@@ -51,5 +68,6 @@ function getDayOfWeekWithDate(dateString) {
 module.exports = {
     formatingString,
     getDayOfWeekWithDate,
-    checkDivPickBan
+    checkDivPickBan,
+    checkCastTime
 }
