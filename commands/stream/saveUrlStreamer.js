@@ -1,13 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { embedBuilder } = require("../../utils/embedBuilder");
+const { setStreamUrl } = require("../../utils/toornamentUtils");
 const fs = require('fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('urlcaster')
         .setDescription('Commande pour enregistrer l\'url lié à une chaîne Youtube ou Twitch !')
-        .addStringOption(option => option.setName("pseudo").setDescription("Nom par lequel vous souhaitez être nommé.").setRequired(true))
-        .addStringOption(option => option.setName("url").setDescription("Url de la chaîne de stream").setRequired(true)),
+        .addStringOption(option => option.setName("nom_stream").setDescription("Nom du stream.").setRequired(true))
+        .addStringOption(option => option.setName("url").setDescription("Url de la chaîne de stream (Youtube ou Twitch)").setRequired(true)),
     async execute(interaction) {
         try {
             const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE];
@@ -35,17 +36,7 @@ module.exports = {
                 return;
             }
 
-            let data = {};
-
-            //Check if the file exist and parse the data in JSON format
-            if (fs.existsSync('data/streamer.json')) {
-                const rawData = fs.readFileSync('data/streamer.json');
-                data = JSON.parse(rawData);
-            }
-
-            data[user.id] = {name: interaction.options.getString('pseudo'), url : interaction.options.getString('url')} ;
-
-            fs.writeFileSync('data/streamer.json', JSON.stringify(data, null, 1));
+            await setStreamUrl(interaction.options.getString('nom_stream'), interaction.options.getString('url'));
 
             await interaction.editReply({ content: `Donnée sauvegardé avec succès !`, ephemeral: false })
 
