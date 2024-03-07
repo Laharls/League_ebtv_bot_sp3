@@ -127,7 +127,7 @@ module.exports = {
  \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
  Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !`;
 
-            const announcementText = checkCastTime(matchData[0].scheduled_datetime);
+            const announcementText = matchData[0].scheduled_datetime ? checkCastTime(matchData[0].scheduled_datetime) : 'Votre match va être cast par';
 
             const casterAnnouncement = co_caster && memberCoCaster ? ` et <@${memberCoCaster.user.id}>` : '';
             const casterAnnouncementText = `${announcementText} <@${member.user.id}>${casterAnnouncement}`
