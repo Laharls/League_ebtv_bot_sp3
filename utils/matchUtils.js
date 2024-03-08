@@ -29,7 +29,7 @@ async function fetchMatches(team1, team2) {
 }
 
 async function fetchUniqueMatch(team1, team2) {
-    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}&statuses=pending`;
+    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}&statuses=pending&is_scheduled=1`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
