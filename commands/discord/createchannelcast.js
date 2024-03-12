@@ -129,6 +129,10 @@ module.exports = {
 
             const announcementText = matchData[0].scheduled_datetime ? checkCastTime(matchData[0].scheduled_datetime) : 'Votre match va être cast par';
 
+	    if(co_caster && memberCoCaster){
+		castChannel.permissionOverwrites.edit(memberCoCaster, { ViewChannel: true, SendMessages: true });
+	    }
+
             const casterAnnouncement = co_caster && memberCoCaster ? ` et <@${memberCoCaster.user.id}>` : '';
             const casterAnnouncementText = `${announcementText} <@${member.user.id}>${casterAnnouncement}`
 
