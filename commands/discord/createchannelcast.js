@@ -6,6 +6,8 @@ const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
 const { setStreamMatch } = require("./../../utils/toornamentUtils")
 
+const STREAM_IDS = require("./../../data/streamer_ids.json")
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('creerchannelcast')
@@ -85,8 +87,8 @@ module.exports = {
                 return await interaction.editReply("Le match a déjà été planifié par un autre caster.");
             }
 
-            if(member.id === process.env.USER_ID_STREAM_SET){
-                await setStreamMatch(matchData[0].id, process.env.STREAM_EBTV_ID)
+            if(STREAM_IDS[member.id] !== undefined){
+                await setStreamMatch(matchData[0].id, STREAM_IDS[member.id])
             }
 
             const castChannel = await guild.channels.create({
