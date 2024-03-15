@@ -84,11 +84,11 @@ async function setStreamUrl(name, urlStream) {
     }
 }
 
-async function setStreamMatch(match_id, stream_id){
+async function setStreamMatch(match_id, stream_id) {
     const url = `https://api.toornament.com/organizer/v2/matches/${match_id}/streams`
     const data = [
         stream_id
-    ]    
+    ]
 
     const config = {
         headers: {
@@ -102,10 +102,24 @@ async function setStreamMatch(match_id, stream_id){
     return true;
 }
 
+async function getToornamentStreamUrl(stream_id) {
+    const url = `https://api.toornament.com/organizer/v2/streams/${stream_id}`
+    const config = {
+        headers: {
+            'X-Api-Key': process.env.API_KEY,
+            'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
+        }
+    }
+
+    const response = await axios.get(url, config);
+    return response.data.url;
+}
+
 module.exports = {
     getTournamentToken,
     updateTokenInEnvFile,
     getNbStage,
     setStreamUrl,
-    setStreamMatch
+    setStreamMatch,
+    getToornamentStreamUrl
 };

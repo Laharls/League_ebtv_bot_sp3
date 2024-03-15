@@ -6,6 +6,7 @@ const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
 const { setStreamMatch } = require("./../../utils/toornamentUtils")
 
+const streamManager = require("./../../utils/streamManager")
 const STREAM_IDS = require("./../../data/streamer_ids.json")
 
 module.exports = {
@@ -87,8 +88,9 @@ module.exports = {
                 return await interaction.editReply("Le match a déjà été planifié par un autre caster.");
             }
 
-            if(STREAM_IDS[member.id] !== undefined){
+            if (STREAM_IDS[member.id] !== undefined) {
                 await setStreamMatch(matchData[0].id, STREAM_IDS[member.id])
+                await streamManager.setStreamUrl(member.id)
             }
 
             const castChannel = await guild.channels.create({
@@ -132,7 +134,9 @@ module.exports = {
  \u2022 Les pronoms et genres des membres de vos équipes
  \u2022 S’il va y avoir des changements entre les manches
  \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
- Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !`;
+ Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !
+ 
+ ${streamManager.getStreamUrl() !== null ? `La diffusion en direct du match est disponible à l'adresse suivante : ${streamManager.getStreamUrl()}` : ''}`;
 
             const announcementText = matchData[0].scheduled_datetime ? checkCastTime(matchData[0].scheduled_datetime) : 'Votre match va être cast par';
 
