@@ -136,7 +136,7 @@ module.exports = {
  \u2022 La prononciation du nom de l'équipe ou des pseudos si elle n’est pas simple \n
  Merci également de rejoindre le lobby ingame avec un pseudo reconnaissable !
  
- ${streamManager.getStreamUrl() !== null ? `La diffusion en direct du match est disponible à l'adresse suivante : ${streamManager.getStreamUrl()}` : ''}`;
+ ${streamManager.getStreamUrl() !== null ? `La diffusion en direct du match est disponible à l'adresse suivante : <${streamManager.getStreamUrl()}>` : ''}`;
 
             const announcementText = matchData[0].scheduled_datetime ? checkCastTime(matchData[0].scheduled_datetime) : 'Votre match va être cast par';
 
