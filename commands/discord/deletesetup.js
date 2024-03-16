@@ -8,46 +8,46 @@ module.exports = {
     async execute(interaction) {
         try {
             const guild = interaction.guild;
-	    const user = interaction.user;
+            const user = interaction.user;
+            const CHANNEL_CATEGORY_TYPE = 4;
 
-	    const member = await guild.members.fetch(user.id);
-	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+            const member = await guild.members.fetch(user.id);
+            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-	    await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
-	    if(!member.roles.cache.has(process.env.ROLE_ID_ADMIN)){
-                interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+            if (!member.roles.cache.has(process.env.ROLE_ID_ADMIN)) {
+                interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: false });
                 return;
             }
 
-            if(guild){
-                const targetPattern = /^Division \d+$/;
-                
-                // Filter channels to get categories with names matching the pattern
-                const divisionCategories = guild.channels.cache.filter(channel =>
-                    channel.type === 4 && targetPattern.test(channel.name)
-                );
-
-                // Log the IDs of the matched categories
-                divisionCategories.forEach(category => {
-                    // Filter channels to get channels within the current category
-                    const channelsInCategory = category.children.cache;
-
-                    channelsInCategory.forEach(channel => {
-                        channel.delete();
-                    })
-
-                    category.delete();
-                });
-
-                interaction.reply({content: `Les divisions de la saison ont bien été supprimée.`, ephemeral: true });
+            if (!guild) {
+                return await interaction.reply({ content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: false });
             }
-            else {
-                return await interaction.reply({content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: true });
-            }
+
+            //Check for a pattern Division followed by a numeric value
+            const targetPattern = /^Division \d+$/;
+
+            const divisionCategories = guild.channels.cache.filter(channel =>
+                channel.type === CHANNEL_CATEGORY_TYPE && targetPattern.test(channel.name)
+            );
+
+            divisionCategories.forEach(category => {
+                const channelsInCategory = category.children.cache;
+
+                channelsInCategory.forEach(channel => {
+                    channel.delete();
+                })
+
+                category.delete();
+            });
+
+            interaction.reply({ content: `Les divisions de la saison ont bien été supprimée.` });
+
+
         } catch (error) {
             console.error(error);
-            interaction.reply({content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
+            interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: false });
         }
     },
 };

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle} = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
@@ -11,81 +11,80 @@ module.exports = {
             const guild = interaction.guild;
             const user = interaction.user;
             const MINUTE_IN_MILLISECONDS = 60_000;
-            const CHANNEL_CATEGORY_TYPE= 4;
+            const CHANNEL_CATEGORY_TYPE = 4;
 
             const member = await guild.members.fetch(user.id);
-	    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-            await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
-            if(!member.roles.cache.has(process.env.ROLE_ID_ADMIN)){
-                interaction.reply({content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true});
+            if (!member.roles.cache.has(process.env.ROLE_ID_ADMIN)) {
+                interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: false });
                 return;
             }
 
-            if(guild){
-                const targetPattern = /.*pr[eé]saison.*/i;
-                
-                const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === CHANNEL_CATEGORY_TYPE && targetPattern.test(channel.name)).first();
+            if (!guild) {
+                return await interaction.reply({ content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: false });
+            }
 
-                if (!preSaisonCategory || preSaisonCategory.size === 0) {
-                    return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
-                }
+            //Check for présaison or presaison pattern
+            const targetPattern = /.*pr[eé]saison.*/i;
 
-                const presaisonChannels = preSaisonCategory.children.cache;
+            const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === CHANNEL_CATEGORY_TYPE && targetPattern.test(channel.name)).first();
 
-                //Filter all the channel of the category to get the channels which are cast channels
-                const channelsNotStartingWithPrésaison = presaisonChannels.filter(channel => !targetPattern.test(channel.name));
+            if (!preSaisonCategory || preSaisonCategory.size === 0) {
+                return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
+            }
 
-                // Concatenate channel names into a single string
-                const channelNamesToDeleteString = channelsNotStartingWithPrésaison.map(channel => `- ${channel.name}`).join('\n');
+            const presaisonChannels = preSaisonCategory.children.cache;
 
-                if(channelNamesToDeleteString.length == 0){
-                    return await interaction.reply({content: `Aucun salon de cast de présaison à supprimer.`, ephemeral: true });
-                }
+            const channelsNotStartingWithPrésaison = presaisonChannels.filter(channel => !targetPattern.test(channel.name));
 
-                //Set up like an embed message, to make it clear what the bot will delete
-                const confirm = new ButtonBuilder()
+            const channelNamesToDeleteString = channelsNotStartingWithPrésaison.map(channel => `- ${channel.name}`).join('\n');
+
+            if (channelNamesToDeleteString.length === 0) {
+                return await interaction.reply({ content: `Aucun salon de cast de présaison à supprimer.`, ephemeral: false });
+            }
+
+            //Set up like an embed message, to make it clear what the bot will delete
+            const confirm = new ButtonBuilder()
                 .setCustomId('confirm')
                 .setLabel('Supprimer salon cast')
                 .setStyle(ButtonStyle.Danger);
 
-                const cancel = new ButtonBuilder()
-                    .setCustomId('cancel')
-                    .setLabel('Annuler')
-                    .setStyle(ButtonStyle.Secondary);
+            const cancel = new ButtonBuilder()
+                .setCustomId('cancel')
+                .setLabel('Annuler')
+                .setStyle(ButtonStyle.Secondary);
 
-                const row = new ActionRowBuilder()
-                    .addComponents(confirm, cancel);
+            const row = new ActionRowBuilder()
+                .addComponents(confirm, cancel);
 
-                const response = await interaction.reply({
-                    content: `Êtes-vous sûr de vouloir supprimer les salons \n${channelNamesToDeleteString} :`,
-                    components: [row],
-                });
-                
-                const collectorFilter = i => i.user.id === interaction.user.id;
+            const response = await interaction.reply({
+                content: `Êtes-vous sûr de vouloir supprimer les salons \n${channelNamesToDeleteString} :`,
+                components: [row],
+            });
 
-                try {
-                    const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: MINUTE_IN_MILLISECONDS });
+            const collectorFilter = i => i.user.id === interaction.user.id;
 
-                    if(confirmation.customId === 'confirm'){
-                        channelsNotStartingWithPrésaison.forEach(channel => {
-                            channel.delete();
-                        })
-                        await confirmation.update({content : "Les salons de cast de présaison ont bien été supprimé.", components: [] });
-                    } else if (confirmation.customId === 'cancel'){
-                        await confirmation.update({content: "Action annulé", components: [] });
-                    }
-                } catch (e) {
-                    await interaction.editReply({ content: 'Aucune confirmation reçu dans la minute, annulation', components: [] });
+            try {
+                const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: MINUTE_IN_MILLISECONDS });
+
+                if (confirmation.customId === 'confirm') {
+                    channelsNotStartingWithPrésaison.forEach(channel => {
+                        channel.delete();
+                    })
+                    await confirmation.update({ content: "Les salons de cast de présaison ont bien été supprimé.", components: [] });
+                } else if (confirmation.customId === 'cancel') {
+                    await confirmation.update({ content: "Action annulé", components: [] });
                 }
+            } catch (e) {
+                await interaction.editReply({ content: 'Aucune confirmation reçu dans la minute, annulation', components: [] });
             }
-            else {
-                return await interaction.reply({content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: true });
-            }
+
         } catch (error) {
             console.error(error);
-            interaction.reply({content: `Une erreur s'est produite lors de l'exécution de la commande : ${error}`, ephemeral: true });
+            interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande`, ephemeral: false });
         }
     },
 };
