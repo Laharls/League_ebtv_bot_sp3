@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { findMatch, setPlanif } = require("./../../utils/matchUtils");
 const { checkUserPermissions } = require("./../../utils/logging/logger");
-const { embedBuilder } = require("./../../utils/embedBuilder");
 
 module.exports = {
     data: new SlashCommandBuilder()
