@@ -21,7 +21,7 @@ module.exports = {
         const member = await guild.members.fetch(user.id);
         const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-        await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+        embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
         const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 

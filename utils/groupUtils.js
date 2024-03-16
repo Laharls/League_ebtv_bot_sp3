@@ -19,7 +19,7 @@ async function fetchGroup(range="0-49") {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         throw new Error(`Error fetching groups: ${error.message}`);
@@ -41,7 +41,7 @@ async function fetchUniqueGroup(group) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         throw new Error(`Une erreur est survenue : ${error.message}`);
@@ -73,7 +73,7 @@ async function getTeamsGroup(stage_id) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         throw new Error(`Error fetching teams group: ${error.message}`)

@@ -21,7 +21,7 @@ async function fetchMatches(team1, team2) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         throw new Error(`Error fetching matches : ${error.message}`);
@@ -44,7 +44,7 @@ async function fetchUniqueMatch(team1, team2) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         throw new Error(`Une erreur est survenue : ${error.message}`);
@@ -95,7 +95,7 @@ async function findMatch(interaction, team1, team2, data, callback) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         console.error(error);
@@ -142,7 +142,7 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         console.error(error);
@@ -187,7 +187,7 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         console.error(error);
@@ -243,7 +243,7 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         console.error(error)
