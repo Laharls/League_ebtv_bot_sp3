@@ -1,5 +1,12 @@
 const { embedBuilder } = require("./../../utils/embedBuilder");
 
+/**
+ * Checks if the user has one of the allowed roles.
+ * @param {Interaction} interaction - The interaction object.
+ * @param {string[]} allowedRolesId - An array of role IDs.
+ * @returns {boolean} Returns true if the user has one of the allowed roles, otherwise throws an error.
+ * @throws {Error} Throws an error User Missing Permission.
+ */
 async function checkUserPermissions(interaction, allowedRolesId) {
     const guild = interaction.guild;
     const user = interaction.user;
@@ -13,7 +20,7 @@ async function checkUserPermissions(interaction, allowedRolesId) {
     const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
 
     if (!hasAllowedRole) {
-        throw new Error('Permissions Discord de l\'utilisateur insuffisantes pour la commande.');
+        throw new Error('Permissions Discord de l\'utilisateur insuffisantes.');
     }
 
     return true;

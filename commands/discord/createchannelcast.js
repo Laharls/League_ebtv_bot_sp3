@@ -1,9 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { ChannelType, PermissionsBitField } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { checkUserPermissions } = require("./../../utils/logging/logger");
 const { formatingString, checkDivPickBan, checkCastTime } = require("./../../utils/utilityTools");
 const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
+const { getCategoryCastMatch, checkExistingChannels, createCastChannel, castAnnouncement } = require('../../utils/castChannel/castChannelUtils');
 const { setStreamMatch } = require("./../../utils/toornamentUtils")
 
 const streamManager = require("./../../utils/streamManager")
@@ -24,53 +25,58 @@ module.exports = {
             await interaction.deferReply();
             await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
-            const co_caster = interaction.options.getUser("co_caster");
-            const memberCoCaster = co_caster ? await guild.members.fetch(co_caster.id) : null;
+            const coCaster = interaction.options.getUser("co_caster");
+            const memberCoCaster = coCaster ? await guild.members.fetch(coCaster.id) : null;
 
             const team1Role = interaction.options.getRole('équipe1_cast');
             const team2Role = interaction.options.getRole('équipe2_cast');
 
-            const team1RoleId = team1Role?.id;
-            const team2RoleId = team2Role?.id;
+            const teamRoles = {
+                team1: {
+                    role: team1Role,
+                    id: team1Role?.id,
+                    name: team1Role?.name
+                },
+                team2: {
+                    role: team2Role,
+                    id: team2Role?.id,
+                    name: team2Role?.name
+                }
+            };
 
-            const team1Name = team1Role?.name;
-            const team2Name = team2Role?.name;
-
-            if (!team1RoleId || !team2RoleId) {
+            if (!teamRoles.team1.id || !teamRoles.team2.id) {
                 await interaction.editReply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
                 return;
             }
 
-            const channelBaseNameFormated = formatingString(`${team1Name}-${team2Name}-cast`);
-            const channelBaseNameFormatedReverse = formatingString(`${team2Name}-${team1Name}-cast`);
+            const channelBaseNameFormated = formatingString(`${teamRoles.team1.name}-${teamRoles.team2.name}-cast`);
+            const channelBaseNameFormatedReverse = formatingString(`${teamRoles.team2.name}-${teamRoles.team1.name}-cast`);
 
-            const matchData = await fetchUniqueMatch(team1Name, team2Name);
+
+            const matchData = await fetchUniqueMatch(teamRoles.team1.name, teamRoles.team2.name);
 
             const divisionName = await fetchUniqueGroup(matchData[0]?.group_id);
 
             //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
             // const targetPattern = /.*pr[eé]saison.*/i; check for presaison
 
+            //Match any string that contain divisionPattern as a substring
             const divisionPattern = divisionName.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const targetPattern = new RegExp(`.*${divisionPattern}.*`, 'i');
 
-            const preSaisonCategory = await guild.channels.fetch()
-                .then(channels => channels.find(channel => channel.type === 4 && targetPattern.test(channel.name)));
+            const castCategory = await getCategoryCastMatch(guild, divisionPattern);
 
-            // const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name)).first(); check for presaison
+            // const castCategory = guild.channels.cache.filter(channel => channel.type === 4 && targetPattern.test(channel.name)).first(); check for presaison
 
-            if (!preSaisonCategory || preSaisonCategory.size === 0) {
+            if (!castCategory || castCategory.size === 0) {
                 return await interaction.editReply('La catégorie où doit être placé le salon n\'a pas été trouvée.');
                 // return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
             }
 
-            const pinPickAndBan = checkDivPickBan(preSaisonCategory.name);
+            const pinPickAndBan = checkDivPickBan(castCategory.name);
 
-            const isExistingChannel = preSaisonCategory.children.cache.find(channel => channel.name === channelBaseNameFormated.toLowerCase());
-            const isExistingChannelReverse = preSaisonCategory.children.cache.find(channel => channel.name === channelBaseNameFormatedReverse.toLowerCase());
+            const channelCastExisting = await checkExistingChannels(castCategory, channelBaseNameFormated, channelBaseNameFormatedReverse)
 
-
-            if (isExistingChannel || isExistingChannelReverse) {
+            if (channelCastExisting) {
                 return await interaction.editReply("Le match a déjà été planifié par un autre caster.");
             }
 
@@ -79,41 +85,39 @@ module.exports = {
                 await streamManager.setStreamUrl(member.id)
             }
 
-            const castChannel = await guild.channels.create({
-                name: `${team1Name}-${team2Name}-cast`,
-                parent: preSaisonCategory.id,
-                type: ChannelType.GuildText,
-                permissionOverwrites: [
-                    {
-                        id: guild.roles.everyone, // @everyone role
-                        deny: [PermissionsBitField.Flags.ViewChannel], // Deny access to everyone
-                    },
-                    {
-                        id: team1RoleId, // Role ID for "équipe1 cast"
-                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], // Allow access to "équipe1 cast"
-                    },
-                    {
-                        id: team2RoleId, // Role ID for "équipe2 cast"
-                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], // Allow access to "équipe2 cast"
-                    },
-                    {
-                        id: process.env.ROLE_ID_STAFF_EBTV,
-                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
-                    },
-                    {
-                        id: process.env.ROLE_ID_ASSISTANT_TO,
-                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
-                    },
-                    {
-                        id: member,
-                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
-                    },
-                    {
-                        id: process.env.BOT_ROLE_ID,
-                        allow: [PermissionsBitField.Flags.ViewChannel]
-                    },
-                ],
-            });
+            const permissionOverwrites = [
+                {
+                    id: guild.roles.everyone, // @everyone role
+                    deny: [PermissionsBitField.Flags.ViewChannel], // Deny access to everyone
+                },
+                {
+                    id: teamRoles.team1.id, // Role ID for "équipe1 cast"
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], // Allow access to "équipe1 cast"
+                },
+                {
+                    id: teamRoles.team2.id, // Role ID for "équipe2 cast"
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], // Allow access to "équipe2 cast"
+                },
+                {
+                    id: process.env.ROLE_ID_STAFF_EBTV,
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                },
+                {
+                    id: process.env.ROLE_ID_ASSISTANT_TO,
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                },
+                {
+                    id: member,
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                },
+                {
+                    id: process.env.BOT_ROLE_ID,
+                    allow: [PermissionsBitField.Flags.ViewChannel]
+                },
+            ]
+
+            const castChannel = await createCastChannel(guild, castCategory, `${teamRoles.team1.name}-${teamRoles.team2.name}-cast`, permissionOverwrites);
+
 
             const castPreparation = `
  Pour bien préparer le cast, merci d’indiquer :\n
@@ -124,16 +128,7 @@ module.exports = {
  
  ${streamManager.getStreamUrl() !== null ? `La diffusion en direct du match est disponible à l'adresse suivante : <${streamManager.getStreamUrl()}>` : ''}`;
 
-            const announcementText = matchData[0].scheduled_datetime ? checkCastTime(matchData[0].scheduled_datetime) : 'Votre match va être cast par';
-
-            if (co_caster && memberCoCaster) {
-                castChannel.permissionOverwrites.edit(memberCoCaster, { ViewChannel: true, SendMessages: true });
-            }
-
-            const casterAnnouncement = co_caster && memberCoCaster ? ` et <@${memberCoCaster.user.id}>` : '';
-            const casterAnnouncementText = `${announcementText} <@${member.user.id}>${casterAnnouncement}`
-
-            await castChannel.send(`# 📣  Cast de votre match 📺 \n <@&${team1RoleId}> <@&${team2RoleId}> \n ${casterAnnouncementText} \n Ce salon vous permettra d'échanger avec le(s) caster(s) et l'autre équipe pour la bonne préparation et le bon déroulement du match. \n ${castPreparation}`);
+            await castAnnouncement(castChannel, teamRoles, member, coCaster, memberCoCaster, matchData, castPreparation);
 
             if (pinPickAndBan) {
                 const msg = await castChannel.send({ files: ['images/s15_pick_ban.png'] });
