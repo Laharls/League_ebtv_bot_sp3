@@ -26,7 +26,7 @@ async function getNbStage() {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             const token = await getTournamentToken();
-            await updateTokenInEnvFile(token);
+            updateTokenInEnvFile(token);
             process.exit();
         }
         console.log(error);
@@ -98,7 +98,7 @@ async function setStreamMatch(match_id, stream_id) {
         }
     }
 
-    const response = await axios.put(url, data, config);
+    await axios.put(url, data, config);
     return true;
 }
 

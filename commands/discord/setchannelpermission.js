@@ -119,8 +119,6 @@ module.exports = {
                 const channelsInCategory = category.children.cache;
 
                 for (const [channelId, channel] of channelsInCategory) {
-                    const channelName = channel.name;
-
                     if (channel.name == `div-${divNumber}-planif`) {
                         await channel.permissionOverwrites.edit(process.env.ROLE_ID_CAPITAINE, {
                             SendMessages: true,
