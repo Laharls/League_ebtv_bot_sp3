@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { handleInteractionWithRoles } = require("./../../utils/logging/logger")
+const { checkUserPermissions } = require("./../../utils/logging/logger")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,7 +12,7 @@ module.exports = {
             const MINUTE_IN_MILLISECONDS = 60_000;
             const CHANNEL_CATEGORY_TYPE = 4;
 
-            await handleInteractionWithRoles(interaction, [process.env.ROLE_ID_ADMIN]);
+            await checkUserPermissions(interaction, [process.env.ROLE_ID_ADMIN]);
 
             //Check for présaison or presaison pattern
             const targetPattern = /.*pr[eé]saison.*/i;

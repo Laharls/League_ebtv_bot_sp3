@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionsBitField } = require('discord.js');
-const { embedBuilder } = require("./../../utils/embedBuilder");
+const { checkUserPermissions } = require("./../../utils/logging/logger");
 const { formatingString, checkDivPickBan, checkCastTime } = require("./../../utils/utilityTools");
 const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
@@ -18,24 +18,11 @@ module.exports = {
         .addUserOption(option => option.setName("co_caster").setDescription("@ de l'utilisateur co_caster").setRequired(false)),
     async execute(interaction) {
         try {
-            const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE];
-
             const guild = interaction.guild;
-            const user = interaction.user;
+            const member = await guild.members.fetch(interaction.user.id);
 
             await interaction.deferReply();
-
-            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
-
-            const member = await guild.members.fetch(user.id);
-            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
-
-            const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
-
-            if (!hasAllowedRole) {
-                interaction.editReply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
-                return;
-            }
+            await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
             const co_caster = interaction.options.getUser("co_caster");
             const memberCoCaster = co_caster ? await guild.members.fetch(co_caster.id) : null;
@@ -49,7 +36,6 @@ module.exports = {
             const team1Name = team1Role?.name;
             const team2Name = team2Role?.name;
 
-            // Check if the roles were found
             if (!team1RoleId || !team2RoleId) {
                 await interaction.editReply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
                 return;

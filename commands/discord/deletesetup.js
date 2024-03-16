@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { handleInteractionWithRoles } = require("./../../utils/logging/logger")
+const { checkUserPermissions } = require("./../../utils/logging/logger")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +11,7 @@ module.exports = {
 
             const CHANNEL_CATEGORY_TYPE = 4;
 
-            await handleInteractionWithRoles(interaction, [process.env.ROLE_ID_ADMIN]);
+            await checkUserPermissions(interaction, [process.env.ROLE_ID_ADMIN]);
 
             //Check for a pattern Division followed by a numeric value
             const targetPattern = /^Division \d+$/;

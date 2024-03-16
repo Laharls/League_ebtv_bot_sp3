@@ -1,6 +1,6 @@
 const { embedBuilder } = require("./../../utils/embedBuilder");
 
-async function handleInteractionWithRoles(interaction, allowedRolesId) {
+async function checkUserPermissions(interaction, allowedRolesId) {
     const guild = interaction.guild;
     const user = interaction.user;
 
@@ -20,5 +20,5 @@ async function handleInteractionWithRoles(interaction, allowedRolesId) {
 }
 
 module.exports = {
-    handleInteractionWithRoles,
+    checkUserPermissions,
 }

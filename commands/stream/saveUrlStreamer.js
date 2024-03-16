@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { embedBuilder } = require("../../utils/embedBuilder");
+
+const { checkUserPermissions } = require("./../../utils/logging/logger");
 const { setStreamUrl } = require("../../utils/toornamentUtils");
 
 module.exports = {
@@ -10,24 +11,9 @@ module.exports = {
         .addStringOption(option => option.setName("url").setDescription("Url de la chaîne de stream (Youtube ou Twitch)").setRequired(true)),
     async execute(interaction) {
         try {
-            const allowedRolesId = [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE];
-
-            const guild = interaction.guild;
-            const user = interaction.user;
-
             await interaction.deferReply();
 
-            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
-
-            const member = await guild.members.fetch(user.id);
-            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
-
-            const hasAllowedRole = allowedRolesId.some(roleId => member.roles.cache.has(roleId));
-
-            if (!hasAllowedRole) {
-                interaction.editReply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true });
-                return;
-            }
+            checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
             const urlPattern = new RegExp(/^https:\/\/(www\.)?(youtube\.com|twitch\.tv)\/(.+?)+$/) //Check for a youtube or twitch url
             if(!urlPattern.test(interaction.options.getString('url'))){
