@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { embedBuilder } = require("./../../utils/embedBuilder");
+const { handleInteractionWithRoles } = require("./../../utils/logging/logger")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -8,32 +8,19 @@ module.exports = {
         .setDescription('Commande pour nettoyer les salons de cast de la présaison.'),
     async execute(interaction) {
         try {
-            const guild = interaction.guild;
-            const user = interaction.user;
+            await interaction.deferReply();
             const MINUTE_IN_MILLISECONDS = 60_000;
             const CHANNEL_CATEGORY_TYPE = 4;
 
-            const member = await guild.members.fetch(user.id);
-            const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
-
-            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
-
-            if (!member.roles.cache.has(process.env.ROLE_ID_ADMIN)) {
-                interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: false });
-                return;
-            }
-
-            if (!guild) {
-                return await interaction.reply({ content: `Problème avec la commande, la guilde n'a pas été trouvée`, ephemeral: false });
-            }
+            await handleInteractionWithRoles(interaction, [process.env.ROLE_ID_ADMIN]);
 
             //Check for présaison or presaison pattern
             const targetPattern = /.*pr[eé]saison.*/i;
 
-            const preSaisonCategory = guild.channels.cache.filter(channel => channel.type === CHANNEL_CATEGORY_TYPE && targetPattern.test(channel.name)).first();
+            const preSaisonCategory = interaction.guild.channels.cache.filter(channel => channel.type === CHANNEL_CATEGORY_TYPE && targetPattern.test(channel.name)).first();
 
             if (!preSaisonCategory || preSaisonCategory.size === 0) {
-                return await interaction.reply('La catégorie de présaison n\'a pas été trouvée.');
+                return await interaction.editReply('La catégorie de présaison n\'a pas été trouvée.');
             }
 
             const presaisonChannels = preSaisonCategory.children.cache;
@@ -43,7 +30,7 @@ module.exports = {
             const channelNamesToDeleteString = channelsNotStartingWithPrésaison.map(channel => `- ${channel.name}`).join('\n');
 
             if (channelNamesToDeleteString.length === 0) {
-                return await interaction.reply({ content: `Aucun salon de cast de présaison à supprimer.`, ephemeral: false });
+                return await interaction.editReply({ content: `Aucun salon de cast de présaison à supprimer.`, ephemeral: false });
             }
 
             //Set up like an embed message, to make it clear what the bot will delete
@@ -60,7 +47,7 @@ module.exports = {
             const row = new ActionRowBuilder()
                 .addComponents(confirm, cancel);
 
-            const response = await interaction.reply({
+            const response = await interaction.editReply({
                 content: `Êtes-vous sûr de vouloir supprimer les salons \n${channelNamesToDeleteString} :`,
                 components: [row],
             });
@@ -83,8 +70,7 @@ module.exports = {
             }
 
         } catch (error) {
-            console.error(error);
-            interaction.reply({ content: `Une erreur s'est produite lors de l'exécution de la commande`, ephemeral: false });
+            interaction.editReply({ content: `${error}`, ephemeral: false });
         }
     },
 };
