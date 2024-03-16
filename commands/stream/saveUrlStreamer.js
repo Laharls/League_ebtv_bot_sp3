@@ -29,7 +29,7 @@ module.exports = {
                 return;
             }
 
-            const urlPattern = new RegExp(/^https:\/\/(www\.)?(youtube\.com|twitch\.tv)\/(.+)+$/) //Check for a youtube or twitch url
+            const urlPattern = new RegExp(/^https:\/\/(www\.)?(youtube\.com|twitch\.tv)\/(.+?)+$/) //Check for a youtube or twitch url
             if(!urlPattern.test(interaction.options.getString('url'))){
                 await interaction.editReply({ content: `L'url donné n'est pas d'une chaîne Youtube ou Twitch.`, ephemeral: false })
                 return;
