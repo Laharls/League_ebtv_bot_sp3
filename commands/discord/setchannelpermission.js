@@ -29,7 +29,7 @@ module.exports = {
             const member = await guild.members.fetch(user.id);
             const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
 
-            await embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
+            embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 
             if (!member.roles.cache.has(process.env.ROLE_ID_STAFF_EBTV)) {
                 interaction.reply({ content: `Vous n'avez pas les permissions requises à l'utilisation de cette commande.`, ephemeral: true })

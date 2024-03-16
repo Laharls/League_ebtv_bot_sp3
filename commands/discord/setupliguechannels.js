@@ -57,25 +57,25 @@ module.exports = {
                     type: ChannelType.GuildText,
                 });
 
-                const planif = await guild.channels.create({
+                await guild.channels.create({
                     name: `div-${i}-planif`,
                     parent: category.id,
                     type: ChannelType.GuildText,
                 });
 
-                const support = await guild.channels.create({
+                await guild.channels.create({
                     name: `div-${i}-support`,
                     parent: category.id,
                     type: ChannelType.GuildText,
                 });
 
-                const recap = await guild.channels.create({
+                await guild.channels.create({
                     name: `div-${i}-récaps-manches`,
                     parent: category.id,
                     type: ChannelType.GuildText,
                 });
 
-                const discussion = await guild.channels.create({
+                await guild.channels.create({
                     name: `div-${i}-discussion`,
                     parent: category.id,
                     type: ChannelType.GuildText,
