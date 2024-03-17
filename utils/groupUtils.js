@@ -26,6 +26,12 @@ async function fetchGroup(range = "0-49") {
     }
 }
 
+/**
+ * Fetches unique group data from the Toornament API.
+ * @param {string} group - The ID of the group to fetch.
+ * @returns {Object} Returns group data if found.
+ * @throws {Error} Throws an error with specific error messages for different HTTP status codes.
+ */
 async function fetchUniqueGroup(group) {
     const url = `https://api.toornament.com/organizer/v2/groups/${group}`;
     const config = {

@@ -84,6 +84,13 @@ async function setStreamUrl(name, urlStream) {
     }
 }
 
+/**
+ * Sets the stream for a match using the Toornament API.
+ * @param {string} match_id - The ID of the match.
+ * @param {string} stream_id - The ID of the stream to set for the match.
+ * @returns {boolean} Returns true if the stream for the match is successfully set, otherwise throws an error.
+ * @throws {Error} Throws an error with specific error messages for different HTTP status codes.
+ */
 async function setStreamMatch(match_id, stream_id) {
     const url = `https://api.toornament.com/organizer/v2/matches/${match_id}/streams`
     const data = [

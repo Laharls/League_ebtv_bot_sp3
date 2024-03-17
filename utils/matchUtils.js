@@ -28,6 +28,13 @@ async function fetchMatches(team1, team2) {
     }
 }
 
+/**
+ * Fetches unique match data between two teams from the Toornament API.
+ * @param {string} team1 - The ID of the first team.
+ * @param {string} team2 - The ID of the second team.
+ * @returns {Object} Returns match data if found.
+ * @throws {Error} Throws an error with specific error messages for different HTTP status codes.
+ */
 async function fetchUniqueMatch(team1, team2) {
     const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}&statuses=pending&is_scheduled=1`;
     const config = {

@@ -1,3 +1,8 @@
+/**
+ * Formats a string by replacing whitespaces with "-", removing special characters, and replacing consecutive "-" with a single "-".
+ * @param {string} string - The string to be formatted.
+ * @returns {string} Returns the formatted string.
+ */
 function formatingString(string){
     // Replace whitespaces with "-"
     const stringWithoutSpaces = string.replace(/\s+/g, '-');
@@ -11,6 +16,11 @@ function formatingString(string){
     return stringWithoutSpecialChars.replace(/-+/g, '-');
 }
 
+/**
+ * Checks if the division name corresponds to a valid pick-ban division.
+ * @param {string} divisionName - The name of the division to check.
+ * @returns {boolean} Returns true if the division name corresponds to a valid pick-ban division, otherwise returns false.
+ */
 function checkDivPickBan(divisionName){
     const parts = divisionName.split(" ")
     const divNumber = parseInt(parts[1]);
