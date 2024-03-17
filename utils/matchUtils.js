@@ -19,12 +19,25 @@ async function fetchMatches(team1, team2) {
         const response = await axios.get(url, config);
         return response.data;
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
+        console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
         }
-        throw new Error(`Error fetching matches : ${error.message}`);
     }
 }
 
@@ -113,12 +126,25 @@ async function findMatch(interaction, team1, team2, data, callback) {
             callback(interaction, data, match_id, team1, team2, opponent1, opponent2);
         }
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
-        }
         console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
+        }
     }
 }
 
@@ -132,39 +158,32 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
     };
 
     try {
-        const response = await axios.patch(url, { scheduled_datetime: match_date }, { headers });
-
-        switch (response.status) {
-            case 200:
-                if (match_date) {
-                   return await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.` })
-                } else {
-                    await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été annulé.` });
-                }
-                break;
-            case 400:
-                await interaction.editReply({ content: 'Requête invalide. Vérifier les paramètres de la commande.' });
-                break;
-            case 403:
-                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
-                break;
-            case 404:
-                await interaction.editReply({ content: 'Match non trouvé.' });
-                break;
-            case 500:
-            case 503:
-                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
-                break;
-            default:
-                console.error(`Erreur code status non apprivoisé : ${response.status}`);
+        await axios.patch(url, { scheduled_datetime: match_date }, { headers });
+        if (match_date) {
+            return await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.` })
+        } else {
+            await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a pas été planifié.` });
         }
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
-        }
         console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
+        }
     }
 }
 
@@ -183,33 +202,27 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
             public_note: `Report ${teamRep}`,
         }, { headers });
 
-        switch (response.status) {
-            case 200:
-                await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}` });
-                break;
-            case 400:
-                await interaction.editReply({ content: 'Requête invalide.' });
-                break;
-            case 403:
-                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
-                break;
-            case 404:
-                await interaction.editReply({ content: 'Match non trouvé.' });
-                break;
-            case 500:
-            case 503:
-                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
-                break;
-            default:
-                console.error(`Erreur code status non apprivoisé : ${response.status}`);
-        }
+        await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été reporté par ${teamRep}` });
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
-        }
         console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
+        }
     }
 }
 
@@ -222,7 +235,7 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
     };
 
     try {
-        const response = await axios.patch(url, {
+        await axios.patch(url, {
             status: "completed",
             opponents: [
                 {
@@ -238,35 +251,28 @@ async function setResult(interaction, score, match_id, winner, loser, opponent1,
             ],
         }, { headers })
 
-        switch (response.status) {
-            case 200:
-                score = `**${score[0]}**-${score[2]}`;
-                await interaction.editReply({ content: `Résultat du match : **${winner}** ${score} ${loser}` });
-                break;
-            case 400:
-                await interaction.editReply({ content: 'Requête invalide.' });
-                break;
-            case 403:
-                await interaction.editReply({ content: "L'application n'est pas autorisée à accéder au tournoi." });
-                break;
-            case 404:
-                await interaction.editReply({ content: 'Match non trouvé.' });
-                break;
-            case 500:
-            case 503:
-                await interaction.editReply({ content: 'Erreur serveur. Veuillez réessayer plus tard.' })
-                break;
-            default:
-                console.error(`Erreur code status non apprivoisé : ${response.status}`);
-        }
+        score = `**${score[0]}**-${score[2]}`;
+        await interaction.editReply({ content: `Résultat du match : **${winner}** ${score} ${loser}` });
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
+        console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
         }
-        console.error(error)
-        interaction.editReply({ content: "Le match n'existe pas.", ephemeral: true })
     }
 }
 

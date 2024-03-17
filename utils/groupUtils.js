@@ -1,8 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const { getTournamentToken, updateTokenInEnvFile } = require('./toornamentUtils');
-
 async function fetchGroup(range = "0-49") {
     const url = `https://api.toornament.com/organizer/v2/groups?tournament_ids=${process.env.TOORNAMENT_ID}`;
     const config = {
@@ -17,12 +15,25 @@ async function fetchGroup(range = "0-49") {
         const response = await axios.get(url, config);
         return response.data;
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
+        console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
         }
-        throw new Error(`Error fetching groups: ${error.message}`);
     }
 }
 
@@ -90,12 +101,25 @@ async function getTeamsGroup(stage_id) {
 
         return teams;
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const token = await getTournamentToken();
-            updateTokenInEnvFile(token);
-            process.exit();
+        console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
         }
-        throw new Error(`Error fetching teams group: ${error.message}`)
     }
 }
 
