@@ -35,12 +35,17 @@ async function getCategoryCastMatch(guild, categoryPattern) {
  * @returns {Promise<TextChannel>} Returns a promise that resolves with the newly created text channel.
  */
 async function createCastChannel(guild, category, channelName, permissionOverwrites) {
-    return await guild.channels.create({
-        name: channelName,
-        parent: category.id,
-        type: ChannelType.GuildText,
-        permissionOverwrites: permissionOverwrites,
-    });
+    try {
+        return await guild.channels.create({
+            name: channelName,
+            parent: category.id,
+            type: ChannelType.GuildText,
+            permissionOverwrites: permissionOverwrites,
+        });
+    } catch (error) {
+        throw new Error('Le bot n\'a pas les permissions requises pour créer le salon de cast.')
+    }
+    
 }
 
 /**

@@ -100,11 +100,11 @@ module.exports = {
                 },
                 {
                     id: process.env.ROLE_ID_STAFF_EBTV,
-                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageChannels],
                 },
                 {
                     id: process.env.ROLE_ID_ASSISTANT_TO,
-                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                    allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageChannels],
                 },
                 {
                     id: member,
@@ -138,8 +138,7 @@ module.exports = {
             await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
 
         } catch (error) {
-            console.error(error);
-            await interaction.editReply({ content: `Une erreur s'est produite lors de l'exécution de la commande, veuillez réessayer ultérieurement.` });
+            await interaction.editReply({ content: `${error}` });
         }
     },
 };
