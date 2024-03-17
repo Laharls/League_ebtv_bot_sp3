@@ -69,10 +69,14 @@ module.exports = {
 
             const matchData = await fetchUniqueMatch(teamRoles.team1.name, teamRoles.team2.name);
 
-            console.log(matchData[0].opponents);
+            //Check if name of both teams correspond to the fetched match
+            if( !(teamRoles.team1.name === matchData[0].opponents[0].participant.name || teamRoles.team1.name === matchData[0].opponents[1].participant.name) && 
+            ((teamRoles.team2.name === matchData[0].opponents[0].participant.name || teamRoles.team2.name === matchData[0].opponents[1].participant.name)) ) {
+                console.error(error);
+                throw new Error('Un autre match a été récupéré au lieu du match sélectionné par l\'utilisateur.');
+            }
 
             const divisionName = await fetchUniqueGroup(matchData[0]?.group_id);
-
             //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
             // const targetPattern = /.*pr[eé]saison.*/i; check for presaison
 
@@ -134,8 +138,6 @@ module.exports = {
             ]
 
             const castChannel = await createCastChannel(guild, castCategory, `${teamRoles.team1.name}-${teamRoles.team2.name}-cast`, permissionOverwrites);
-
-
             const castPreparation = `
  Pour bien préparer le cast, merci d’indiquer :\n
  \u2022 Les pronoms des membres de vos équipes
@@ -152,8 +154,7 @@ module.exports = {
                 await msg.pin();
             }
 
-            return await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
-
+            return await interaction.editReply({ content: `Le salon de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
         } catch (error) {
             await interaction.editReply({ content: `${error}` });
         }
