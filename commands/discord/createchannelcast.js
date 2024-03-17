@@ -19,6 +19,8 @@ module.exports = {
         .addUserOption(option => option.setName("co_caster").setDescription("@ de l'utilisateur co_caster").setRequired(false)),
     async execute(interaction) {
         try {
+            await interaction.deferReply();
+
             const guild = interaction.guild;
             let member;
             
@@ -29,7 +31,6 @@ module.exports = {
                 throw new Error("Échec lors de la récupération des données du caster pour les autorisations du salon.")
             }
 
-            await interaction.deferReply();
             await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
             const coCaster = interaction.options.getUser("co_caster");
@@ -68,6 +69,8 @@ module.exports = {
 
             const matchData = await fetchUniqueMatch(teamRoles.team1.name, teamRoles.team2.name);
 
+            console.log(matchData[0].opponents);
+
             const divisionName = await fetchUniqueGroup(matchData[0]?.group_id);
 
             //Regular expression which check for the category presaison name, regardless of emoji if they are any in the category name
@@ -93,6 +96,7 @@ module.exports = {
                 return await interaction.editReply("Le match a déjà été planifié par un autre caster.");
             }
 
+            //Set the stream url of the caster to the match
             if (STREAM_IDS[member.id] !== undefined) {
                 await setStreamMatch(matchData[0].id, STREAM_IDS[member.id])
                 await streamManager.setStreamUrl(member.id)
