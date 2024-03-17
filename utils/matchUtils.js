@@ -108,7 +108,7 @@ async function findMatch(interaction, team1, team2, data, callback) {
         }
         // If no match is found
         if (match_id == 0) {
-            interaction.editReply({ content: `Il n'y a pas de match entre ${team1} et ${team2}, vérifier les teams.` })
+            return interaction.editReply({ content: `Il n'y a pas de match entre ${team1} et ${team2}, vérifier les teams.` })
         } else {
             callback(interaction, data, match_id, team1, team2, opponent1, opponent2);
         }
@@ -137,8 +137,7 @@ async function setPlanif(interaction, match_date, match_id, team1, team2) {
         switch (response.status) {
             case 200:
                 if (match_date) {
-
-                    await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.` })
+                   return await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été planifié le ${getDayOfWeekWithDate(match_date.substring(0, 10))} à ${match_date.substring(11, 16)}.` })
                 } else {
                     await interaction.editReply({ content: `Le match entre ${team1} et ${team2} a été annulé.` });
                 }
