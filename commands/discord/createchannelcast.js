@@ -23,7 +23,7 @@ module.exports = {
 
             const guild = interaction.guild;
             let member;
-            
+
             try {
                 member = await guild.members.fetch(interaction.user.id);
             } catch (error) {
@@ -69,10 +69,20 @@ module.exports = {
 
             const matchData = await fetchUniqueMatch(teamRoles.team1.name, teamRoles.team2.name);
 
+            if (!matchData || matchData.length === 0) {
+                throw new Error('Aucun match planifié correspondant n\'a été trouvé.');
+            }
+
+            if (!matchData[0].opponents || matchData[0].opponents.length === 0) {
+                throw new Error('Aucun adversaire trouvé pour le match sélectionné.');
+            }
+
+            const opponent1Name = matchData[0].opponents[0]?.participant?.name;
+            const opponent2Name = matchData[0].opponents[1]?.participant?.name;
+
             //Check if name of both teams correspond to the fetched match
-            if( !(teamRoles.team1.name === matchData[0].opponents[0].participant.name || teamRoles.team1.name === matchData[0].opponents[1].participant.name) && 
-            ((teamRoles.team2.name === matchData[0].opponents[0].participant.name || teamRoles.team2.name === matchData[0].opponents[1].participant.name)) ) {
-                console.error(error);
+            if (!(teamRoles.team1.name === opponent1Name || teamRoles.team1.name === opponent2Name) &&
+                (teamRoles.team2.name === opponent1Name || teamRoles.team2.name === opponent2Name)) {
                 throw new Error('Un autre match a été récupéré au lieu du match sélectionné par l\'utilisateur.');
             }
 
