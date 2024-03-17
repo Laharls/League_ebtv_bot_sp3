@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionsBitField } = require('discord.js');
 const { checkUserPermissions } = require("./../../utils/logging/logger");
-const { formatingString, checkDivPickBan, checkCastTime } = require("./../../utils/utilityTools");
+const { formatingString, checkDivPickBan } = require("./../../utils/utilityTools");
 const { fetchUniqueMatch } = require("./../../utils/matchUtils");
 const { fetchUniqueGroup } = require('../../utils/groupUtils');
 const { getCategoryCastMatch, checkExistingChannels, createCastChannel, castAnnouncement } = require('../../utils/castChannel/castChannelUtils');
@@ -20,13 +20,27 @@ module.exports = {
     async execute(interaction) {
         try {
             const guild = interaction.guild;
-            const member = await guild.members.fetch(interaction.user.id);
+            let member;
+            
+            try {
+                member = await guild.members.fetch(interaction.user.id);
+            } catch (error) {
+                console.error(error);
+                throw new Error("Échec lors de la récupération des données du caster pour les autorisations du salon.")
+            }
 
             await interaction.deferReply();
             await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
             const coCaster = interaction.options.getUser("co_caster");
-            const memberCoCaster = coCaster ? await guild.members.fetch(coCaster.id) : null;
+            let memberCoCaster;
+
+            try {
+                memberCoCaster = coCaster ? await guild.members.fetch(coCaster.id) : null;
+            } catch (error) {
+                console.error(error);
+                throw new Error("Échec lors de la récupération des données du CoCaster pour les autorisations du salon.")
+            }
 
             const team1Role = interaction.options.getRole('équipe1_cast');
             const team2Role = interaction.options.getRole('équipe2_cast');
@@ -45,13 +59,12 @@ module.exports = {
             };
 
             if (!teamRoles.team1.id || !teamRoles.team2.id) {
-                await interaction.editReply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: true });
+                await interaction.editReply({ content: "Le rôle ou les rôles n'ont pas été trouvés", ephemeral: false });
                 return;
             }
 
             const channelBaseNameFormated = formatingString(`${teamRoles.team1.name}-${teamRoles.team2.name}-cast`);
             const channelBaseNameFormatedReverse = formatingString(`${teamRoles.team2.name}-${teamRoles.team1.name}-cast`);
-
 
             const matchData = await fetchUniqueMatch(teamRoles.team1.name, teamRoles.team2.name);
 
@@ -135,7 +148,7 @@ module.exports = {
                 await msg.pin();
             }
 
-            await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
+            return await interaction.editReply({ content: `Le channel de cast ${castChannel.name} a été crée par ${member.nickname !== null && member.nickname !== "null" ? member.nickname : member.user.username} (${member.user.username} le ${new Date().toLocaleString()})`, ephemeral: false })
 
         } catch (error) {
             await interaction.editReply({ content: `${error}` });

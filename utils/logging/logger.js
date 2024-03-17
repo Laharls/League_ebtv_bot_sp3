@@ -11,9 +11,22 @@ async function checkUserPermissions(interaction, allowedRolesId) {
     const guild = interaction.guild;
     const user = interaction.user;
 
-    const channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+    let channel;
+    let member;
 
-    const member = await guild.members.fetch(user.id);
+    try {
+        channel = await guild.channels.cache.get(process.env.CHANNEL_ID_LOG_BOT);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Salon de log inexistant ou inaccessible');
+    }
+
+    try {
+        member = await guild.members.fetch(user.id);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Echec de récupération des données de l\'utilisateur pour les données de log.')
+    }
 
     embedBuilder("Log O.R.C.A", member, channel, interaction.commandName);
 

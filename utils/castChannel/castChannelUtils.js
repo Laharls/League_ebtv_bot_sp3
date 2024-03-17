@@ -45,7 +45,6 @@ async function createCastChannel(guild, category, channelName, permissionOverwri
     } catch (error) {
         throw new Error('Le bot n\'a pas les permissions requises pour créer le salon de cast.')
     }
-    
 }
 
 /**
