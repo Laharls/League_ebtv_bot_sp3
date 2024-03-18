@@ -1,8 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { checkUserPermissions } = require('./../../utils/logging/logger');
-const { getUniqueParticipant, setNewLineup, addPlayerToTeam, removePlayerFromTeam } = require('./../../utils/toornament/participant');
-
-const TEAM_IDS = require("./../../data/teams_ids.json");
+const { addPlayerToTeam, removePlayerFromTeam } = require('./../../utils/toornament/participant');
 
 module.exports = {
     data: new SlashCommandBuilder()

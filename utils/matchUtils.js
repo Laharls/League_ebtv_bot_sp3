@@ -1,7 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const { getTournamentToken, updateTokenInEnvFile } = require('./toornamentUtils');
 const { getDayOfWeekWithDate } = require('./utilityTools');
 const TEAM_IDS = require("./../data/teams_ids.json")
 
@@ -197,7 +196,7 @@ async function setReport(interaction, teamRep, match_id, team1, team2) {
     };
 
     try {
-        const response = await axios.patch(url, {
+        await axios.patch(url, {
             scheduled_datetime: null,
             public_note: `Report ${teamRep}`,
         }, { headers });
