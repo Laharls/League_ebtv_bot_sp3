@@ -81,8 +81,8 @@ module.exports = {
             const opponent2Name = matchData[0].opponents[1]?.participant?.name;
 
             //Check if name of both teams correspond to the fetched match
-            if (!(teamRoles.team1.name === opponent1Name || teamRoles.team1.name === opponent2Name) &&
-                (teamRoles.team2.name === opponent1Name || teamRoles.team2.name === opponent2Name)) {
+            if (!(teamRoles.team1.name === opponent1Name || teamRoles.team1.name === opponent2Name) ||
+                !(teamRoles.team2.name === opponent1Name || teamRoles.team2.name === opponent2Name)) {
                 throw new Error('Un autre match a été récupéré au lieu du match sélectionné par l\'utilisateur.');
             }
 

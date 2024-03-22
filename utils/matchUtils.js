@@ -48,18 +48,32 @@ async function fetchMatches(team1, team2) {
  * @throws {Error} Throws an error with specific error messages for different HTTP status codes.
  */
 async function fetchUniqueMatch(team1, team2) {
-    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]},${TEAM_IDS[team2]}&tournament_ids=${process.env.TOORNAMENT_ID}&statuses=pending&is_scheduled=1`;
+    const url = `https://api.toornament.com/organizer/v2/matches?participant_ids=${TEAM_IDS[team1]}&tournament_ids=${process.env.TOORNAMENT_ID}&statuses=pending&is_scheduled=1`;
     const config = {
         headers: {
             'X-Api-Key': process.env.API_KEY,
             'Authorization': `Bearer ${process.env.TOORNAMENT_TOKEN}`,
-            'Range': "matches=0-1",
+            'Range': "matches=0-5",
         }
     }
 
     try {
         const response = await axios.get(url, config);
-        return response.data;
+        const opponentsSet = new Set([team2]);
+
+        if (response.data.length === 1) {
+            return response.data;
+        }
+
+        for (const match of response.data) {
+            for (const team of match.opponents) {
+                if (opponentsSet.has(team.participant.name)) {
+                    return [match];
+                }
+            }
+        }
+
+        throw new Error('Aucun match trouvé entre les deux équipes.')
     } catch (error) {
         console.error(error);
         switch (error.response.status) {
