@@ -72,8 +72,6 @@ async function fetchUniqueMatch(team1, team2) {
                 }
             }
         }
-
-        throw new Error('Aucun match trouvé entre les deux équipes.')
     } catch (error) {
         console.error(error);
         switch (error.response.status) {

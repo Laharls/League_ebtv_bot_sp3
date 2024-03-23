@@ -83,7 +83,7 @@ module.exports = {
             //Check if name of both teams correspond to the fetched match
             if (!(teamRoles.team1.name === opponent1Name || teamRoles.team1.name === opponent2Name) ||
                 !(teamRoles.team2.name === opponent1Name || teamRoles.team2.name === opponent2Name)) {
-                throw new Error('Un autre match a été récupéré au lieu du match sélectionné par l\'utilisateur.');
+                throw new Error('Aucun match planifié a été trouvée pour ces deux équipes.');
             }
 
             const divisionName = await fetchUniqueGroup(matchData[0]?.group_id);
