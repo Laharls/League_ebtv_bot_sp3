@@ -4,7 +4,6 @@ const fs = require('fs');
 const querystring = require('querystring');
 
 function updateTokenInEnvFile(newToken) {
-    console.log('token toornament', newToken)
     const envConfig = dotenv.parse(fs.readFileSync('.env'));
     envConfig.TOORNAMENT_TOKEN = newToken.access_token;
     fs.writeFileSync('.env', Object.entries(envConfig).map(([key, value]) => `${key}=${value}`).join('\n'));
