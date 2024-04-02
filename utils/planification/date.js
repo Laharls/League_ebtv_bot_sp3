@@ -24,10 +24,11 @@ function parseAndFormatDate(dateInput, hourInput) {
     // Determine if daylight saving time (CEST) is in effect for Paris
     const now = new Date();
     // returns the time zone offset in minutes between the current locale's (the browser's or Node.js environment's) time zone and UTC
-    const isDaylightSavingTimeInParis  = now.getTimezoneOffset() === -120; // 120 minutes = 2 hours (CEST)
+    // const isDaylightSavingTimeInParis  = now.getTimezoneOffset() === -120; // 120 minutes = 2 hours (CEST)
 
     // Set the timezone offset accordingly
-    const timezoneOffset = isDaylightSavingTimeInParis  ? "+02:00" : "+01:00";
+    // const timezoneOffset = isDaylightSavingTimeInParis  ? "+02:00" : "+01:00";
+    const timezoneOffset = "+02:00";
 
     const formattedDate = `${combinedDate.getFullYear()}-${String(combinedDate.getMonth() + 1).padStart(2, '0')}-${String(combinedDate.getDate()).padStart(2, '0')}T${String(combinedDate.getHours()).padStart(2, '0')}:${String(combinedDate.getMinutes()).padStart(2, '0')}:${String(combinedDate.getSeconds()).padStart(2, '0')}${timezoneOffset}`;
 
