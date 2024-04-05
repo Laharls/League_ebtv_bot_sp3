@@ -9,7 +9,6 @@ module.exports = {
         .setDescription('Commande pour liée une vidéo à un match !')
         .addRoleOption(option => option.setName('equipe1').setDescription('Le rôle de la première équipe du match.').setRequired(true))
         .addRoleOption(option => option.setName('equipe2').setDescription('Le rôle de la seconde équipe du match.').setRequired(true))
-        .addStringOption(option => option.setName('titre').setDescription('Titre de la vidéo (les équipes qui se sont opposées).').setRequired(true))
         .addStringOption(option => option.setName('url').setDescription('L\'url de la vidéo').setRequired(true)),
     async execute(interaction) {
         try {
@@ -35,7 +34,7 @@ module.exports = {
                 return;
             }
 
-            setVideo(titre, url, matchId);
+            setVideo(`${equipe1} vs ${equipe2}`, url, matchId);
             await interaction.editReply(`Le lien de la vidéo a bien été ajoutée.`);
         } catch (error) {
             console.error(error);
