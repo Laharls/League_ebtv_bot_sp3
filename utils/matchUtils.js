@@ -40,6 +40,68 @@ async function fetchMatches(team1, team2) {
     }
 }
 
+async function getMatchId(team1, team2) {
+    try {
+        const matches = await fetchMatches(team1, team2);
+        // return;
+
+        let match_id = 0;
+        let opponent1;
+        let opponent2;
+        // let data = {};
+
+        for (const match of matches) {
+            const opp = match.opponents;
+
+            if (
+                !opp[0]?.participant?.name ||
+                !opp[1]?.participant?.name
+            ) {
+                // Skip the current iteration if either name is null
+                continue;
+            }
+
+            if (
+                (opp[0].participant.name.toLowerCase() === team1.toLowerCase() ||
+                    opp[0].participant.name.toLowerCase() === team2.toLowerCase()) &&
+                (opp[1].participant.name.toLowerCase() === team1.toLowerCase() ||
+                    opp[1].participant.name.toLowerCase() === team2.toLowerCase())
+            ) {
+                //Only search for pending matches
+                //check if match participants are the searched one
+                match_id = match.id;
+                // data.stage_id = match.stage_id;
+                opponent1 = opp[0].participant;
+                opponent2 = opp[1].participant;
+                break;
+            }
+        }
+
+        return match_id;
+
+    } catch (error) {
+        console.error(error);
+        switch (error.response.status) {
+            case 400:
+                throw new Error('Requête Invalide: La requête est mal formée.');
+            case 401:
+                throw new Error('Non autorisé: Le bot ne possède pas un token d\'authentification valide.');
+            case 403:
+                throw new Error('Interdit: Le bot n\'a pas l\'autorisation d\'accéder à cette ressource.');
+            case 404:
+                throw new Error('Non trouvé: La requête effectué n\'existe pas');
+            case 405:
+                throw new Error('Méthode non authorisée: Le type de requête effectuée n\'est pas valide.');
+            case 429:
+                throw new Error('Trop de requête: Le bot a envoyé trop de requête dans un court temps imparti.')
+            case 500:
+                throw new Error('Erreur Serveur: Le serveur a rencontré une erreur imprévue.');
+            default:
+                throw new Error('Une erreur inconnue est survenue, veuillez réessayer plus tard.');
+        }
+    }
+}
+
 /**
  * Fetches unique match data between two teams from the Toornament API.
  * @param {string} team1 - The ID of the first team.
@@ -292,5 +354,6 @@ module.exports = {
     setPlanif,
     setReport,
     setResult,
-    fetchUniqueMatch
+    fetchUniqueMatch,
+    getMatchId
 }
