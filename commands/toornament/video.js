@@ -14,7 +14,7 @@ module.exports = {
         try {
             await interaction.deferReply();
 
-            await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO]);
+            await checkUserPermissions(interaction, [process.env.ROLE_ID_STAFF_EBTV, process.env.ROLE_ID_ASSISTANT_TO, process.env.ROLE_ID_CASTER_INDE]);
 
             const titre = interaction.options.getString('titre');
             const url = interaction.options.getString('url');
